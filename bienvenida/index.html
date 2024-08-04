@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Bienvenida al curso
+
+#### Introducción a la Programación (IP)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- Construcción de comunidad
+- Logística del curso
+- Preguntas
+- Tareas (son chuiquitas)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Construcción de comunidad
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Me presento
+<img src="settings/assets/yo 1.jpg" alt="" style="width: 200px; object-fit: fill">
+
+- Nicolás Carvajal Chaves (23)
+  - &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Ingeniero de Sistemas y Computación
+  - &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Me gusta enseñar (Cupitaller)
+  - &shy;<!-- .element: class="fragment" data-fragment-index="3" -->Ánime y series
+  - &shy;<!-- .element: class="fragment" data-fragment-index="4" -->Desarrollo web
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Nos presentamos (Pero dinámico)
+
+- ¿Cómo se llaman?
+- ¿Qué están estudiando y en qué semestre van?
+- ¿Qué han escuchado de este curso? (Nada es una posible respuesta)
+- ¿Qué esperan de este curso?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué espero de ustedes?
+
+- Respeto mutuo
+- Que me pregunten ante cualquier cosa
+- **Recuérdenme del tiempo** (10 minutos)
+- Contagiarlos del mundo de la programación
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Logística del curso
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Reglas de juego
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Reglas de juego (mías)
+
+- Iniciaré la clase 5 minutos después de la hora en Banner (usaré esos minutos para tomar asistencia)
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Siempre que lleguen al salón, cierren la puerta (a menos que les indique lo contrario)
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Pueden salir cuando quieran, siempre y cuando no interrumpan
+- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->Tengo un horario de atención (ustedes deciden cuándo es)
+- &shy;<!-- .element: class="fragment" data-fragment-index="4" -->Acuérdenme todo
+- &shy;<!-- .element: class="fragment" data-fragment-index="5" -->¿Otras? (Dialoguemos)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Reglas de juego (del curso)
+
+- No se permite el uso de celulares (salvo al usar authenticator)
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Eviten los distractores
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Nos comunicaremos por correo y Bloque Neón
+- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->La asistencia es obligatoria (>= 80%)
+- &shy;<!-- .element: class="fragment" data-fragment-index="4" -->Las inasistencias se pueden justificar (3 días calendario después de la clase)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Reglas de juego (del curso)
+
+- Usaremos un forms para las inasistencias
+- Todas las entregas son por Bloque Neón y Senecode
+- Usaremos un forms para los reclamos de notas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Estructura del curso
+
+<img src="settings/assets/Pasted image 20240804144504.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Estructura del curso
+
+<img src="settings/assets/Pasted image 20240804144610.png" alt="" style="object-fit: scale-down">
+
+- N#-C#, N#-L#, N#-PUBLI, N#-EXAM, N#-PROY
+- Les hice un calendario en vivo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Clases y laboratorios
+
+- **Clases**: Teoría y ejercicios para afianzar conocimientos (sin computador)
+- **Laboratorios**: Ejercicios para afianzar conocimientos (con computador) - No tienen nota
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Tareas
+
+- Una semanal con fecha límite (en senecode)
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Sí tienen nota 
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Calificación es automática
+- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->Tienen intentos ilimitados
+- &shy;<!-- .element: class="fragment" data-fragment-index="4" -->Es su oportunidad de aprender y probar sin ser penalizados
+- &shy;<!-- .element: class="fragment" data-fragment-index="5" -->Trabajo **INDIVIDUAL**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Proyectos
+
+- Uno por nivel con fecha límite
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Enunciados
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Se publican en la fecha del cronograma (si no los he publicado acuérdenme)
+- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->Trabajo **INDIVIDUAL**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Detección de copia / fraude
+
+- Si se copian, lo vamos a detectar
+- Programa de la coordinación
+- Yo trabajo en eso
+- Por similitud
+- Simplemente **NO LO HAGAN**
+- Casos graves anecdóticos (APO masivo, entre secciones, mandar a hacer trabajos, etc)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Exámenes
+
+- Uno por nivel con fecha definida
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->4 a 6 puntos
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Puntos prácticos
+- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->Unos pocos puntos teóricos
+- &shy;<!-- .element: class="fragment" data-fragment-index="4" -->Si hacen el proyecto, pueden hacer el examen
+- &shy;<!-- .element: class="fragment" data-fragment-index="5" -->El mismo día que la entrega del proyecto
+- &shy;<!-- .element: class="fragment" data-fragment-index="6" -->Trabajo **INDIVIDUAL**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Evaluación de los exámenes
+
+<img src="settings/assets/Pasted image 20240804151730.png" alt="" style="object-fit: scale-down">
+
+*Si la nota del examen es menor al 60% del proyecto, se anula el proyecto
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Aproximación de notas finales
+
+<img src="settings/assets/Pasted image 20240804151906.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Entrega de calificaciones
+
+- Por Bloque Neón
+- 10 días calendario después de la entrega (si no lo hago acuérdenme)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Actividades épsilon
+
+- Curso tipo épsilon
+- Ética
+- 3 actividades a lo largo del semestre
+- 2 durante clase y 1 es tarea
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Hablando de ética...
+
+### Clausula de arrepentimiento
+
+- Si hace entrega de un **proyecto** no 100% original deber reportarse dentro de 72 horas después de la entrega
+- La nota del proyecto es 0
+- No se afectan otras notas
+- No hay acciones disciplinarias
+- Solo se puede usar una vez
+- Si se reincide: 0 en la nota del nivel y proceso disciplinario
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ajustes razonables
+
+- Hablen si tienen alguna dificultad. Estoy para ayudarlos, pero tienen que avisar para poder actuar rápido
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## MAAD (maltrato, acoso, amenaza, discriminación)
+
+- Si se sienten es una situación de este tipo (dentro o fuera del campus), reporten de inmediato
+	- Línea MAAD (lineamaad@uniandes.edu.co)
+	- Decanatura de estudiantes (DECA)
+	- Ombudsperson
+	- Red de estudiantes
+	- No estás solo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 5%; top: 0%; height: 10%; width: 90%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+## Cupitaller
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 5%; height: 90%; width: 60%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+- Tutorías gratuitas, personalizadas de estudiantes para estudiantes
+- Se reserva en linea (les llega al correo)
+- **NO REEMPLAZA**:
+	- Clases teóricas
+	- Sesiones de laboratorio
+	- Atención por parte mia
+
+</div>
+
+<div class="" style="position: absolute; left: 65%; top: undefined%; height: 90%; width: 30%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<img src="settings/assets/Pasted image 20240804162610.png" alt="" style="width: 300px; object-fit: fill">
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Monitores
+
+- Les cuento más de ellas cuando tengamos el primer laboratorio
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 5%; top: 5%; height: 10%; width: 90%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+## Senecode
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 5%; height: 90%; width: 60%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+- Calificador automático de Python
+- Intentos **ILIMITADOS**
+- Yo les aviso apenas tengan acceso
+
+</div>
+
+<div class="" style="position: absolute; left: 65%; top: undefined%; height: 90%; width: 30%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<img src="settings/assets/Pasted image 20240804163951.png" alt="" style="object-fit: scale-down">
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Forms de reclamos de notas y justificación de inasistencias
+
+<split even gap="2">
+<img src="settings/assets/Pasted image 20240804170815.png" alt="" style="width: 400px; object-fit: fill">
+
+<img src="settings/assets/Pasted image 20240804170833.png" alt="" style="width: 400px; object-fit: fill">
+
+</split>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 5%; top: 5%; height: 10%; width: 90%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+## Diapositivas
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 5%; height: 90%; width: 30%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+Disponibles en **Contenido** > **Recursos adicionales** > **Diapositivas de clase**
+
+</div>
+
+<div class="" style="position: absolute; left: 35%; top: undefined%; height: 90%; width: 60%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<img src="settings/assets/Pasted image 20240804171405.png" alt="" style="object-fit: scale-down">
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Tareas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Tareas
+
+- Si no lo han hecho ya, revisar el contenido de Bloque Neón de "Antes de empezar"
+	- Hacer encuesta de entrada
+	- Hacer examen de entrada
+	- Revisar cronograma
+- Instalar Anaconda y correr Spyder en sus computadores
+- Leer Nivel 1: Empezando a programar (Solo inicio de sección 2 y sección 2.1)
+- Lleguen con preguntas
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
