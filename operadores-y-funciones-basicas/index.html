@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Introducción a la programación
+
+##### Operadores aritméticos, cadenas de texto, conversión de tipos y funciones básicas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- Operadores aritméticos en Python
+
+- Trabajo con cadenas de texto
+
+- Conversión de tipos
+
+- Funciones de input y output
+
+- Otras funciones útiles
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Operadores aritméticos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Operadores aritméticos básicos
+
+| **Operador**        | **Símbolo** | **Ejemplo** | **Resultado** |
+|---------------------|-------------|-------------|---------------|
+| **Suma**            | `+`         | `3 + 2`     | `5`           |
+| **Resta**           | `-`         | `5 - 2`     | `3`           |
+| **Multiplicación**  | `*`         | `4 * 2`     | `8`           |
+| **División**        | `/`         | `6 / 3`     | `2.0`         |
+| **División entera** | `//`        | `7 // 3`    | `2`           |
+| **Módulo**          | `%`         | `7 % 3`     | `1`           |
+| **Exponenciación**  | `**`        | `2 ** 3`    | `8`           |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Precedencia de Operaciones
+
+- Python sigue la misma **precedencia de operaciones** que en matemáticas: **PEMDAS**:
+
+1. **P**aréntesis: `()`
+
+2. **E**xponentes: `**`
+
+3. **M**ultiplicación y **D**ivisión: `*`, `/`, `//`, `%`
+
+4. **A**dición y **S**ustracción: `+`, `-`
+
+- **Ejemplo**:
+
+```python
+resultado = 3 + 5 * 2 ** 2 / (4 - 1)
+print(resultado) # Imprime 9.666...
+
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Cómo calcular una raíz cuadrada?
+
+- **Pregunta**: Si quieren calcular la raíz cuadrada de un número en Python, ¿cómo lo harían usando operadores aritméticos?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Propiedad Matemática
+
+$
+\sqrt[n]{a^m} = a^{\frac{m}{n}}
+$
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Cómo calcular una raíz cuadrada?
+
+- **Ejemplo**:
+
+```python
+raiz = 9 ** (1/2)
+print(raiz) # Imprime 3.0
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Cadenas de texto
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Trabajo con cadenas de texto
+
+- **Concatenación**: Unir cadenas de texto usando `+`.
+
+- **Repetición**: Repetir cadenas de texto usando `*`.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejemplo de concatenación
+
+```python
+nombre = "Nico"
+mensaje = "Hola" + nombre + "."
+print(mensaje)
+```
+
+- ¿Qué mensaje se imprime?
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Respuesta: `HolaNico.`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Si quieres agregar un espacio entre las palabras...
+
+```python
+nombre = "Nico"
+mensaje = "Hola " + nombre + "."
+print(mensaje)
+```
+
+o también
+
+```python
+nombre = "Nico"
+mensaje = "Hola" + " " + nombre + "."
+print(mensaje)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejemplo de repetición
+
+```python
+saludo = "Hol"
+saludo = saludo + "a" * 5
+print(saludo)
+```
+
+- ¿Qué mensaje se imprime?
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Respuesta: `Holaaaaa`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Concatenación y conversión de tipos
+
+<div class="callout callout-color1">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-info-circle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+¿Esto qué hará?
+
+</div>
+</div>
+<div class="callout-content">
+
+`concatenado = "Hola" + 1`
+
+</div>
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Concatenación y conversión de tipos
+
+<div class="callout callout-color7">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-bolt" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+Esto va a dar un error
+
+</div>
+</div>
+<div class="callout-content">
+
+`concatenado = "Hola" + 1`
+
+</div>
+</div>
+
+```shell
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: can only concatenate str (not "int") to str
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Concatenación y conversión de tipos
+
+<div class="callout callout-color1">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-info-circle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+¿Cómo lo solucionamos?
+
+</div>
+</div>
+<div class="callout-content">
+
+`concatenado = "Hola" + str(1)`
+
+</div>
+</div>
+
+Porque str(1) => "1"
+
+`"Hola" + "1"` sí lo puedo hacer
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Concatenación y conversión de tipos**
+
+```python
+nombre = "Nico"
+edad = 25
+mensaje = "Hola, " + nombre + ". Tienes " + str(edad) + " años."
+print(mensaje)
+```
+
+- **Importante**: Para concatenar cadenas con otros tipos de datos (como enteros), es necesario convertir esos datos a cadenas usando `str()`.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Conversión de tipos
+
+- La conversión de tipos es el proceso de convertir un tipo de dato en otro.
+- Python proporciona funciones para convertir entre tipos de datos.
+- También se puede hacer la conversión con otros tipos de datos.
+
+```python
+float("3.14") # Esto retorna 3.14
+int(3.14) # Esto retorna 3
+str(3.14) # Esto retorna "3.14"
+
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Funciones de input y output
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Para mostrar cosas
+
+### Función `print()`
+
+- **Descripción**: Muestra mensajes o valores en la consola.
+
+- **Ejemplo**:
+
+```python
+print("¡Hola, mundo!")
+print(3 + 5)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Para pedir cosas
+
+### Función `input("mensaje")`
+
+- **Descripción**: Permite al usuario ingresar datos desde la consola y retoran el valor ingresado como `str`.
+
+- **Ejemplo**:
+
+```python
+nombre = input("¿Cuál es tu nombre? ")
+print("Hola, " + nombre)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Para pedir cosas
+
+<div class="callout callout-color1">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-info-circle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+`input` retorna una cadena de texto
+
+</div>
+</div>
+<div class="callout-content">
+
+Tengan en cuenta que `input` retorna un `str`, entonces es necesario convertir a un número si se pregunta por un número
+
+</div>
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Para pedir cosas
+
+```python
+edad = int(input("¿Cuál es tu edad?"))
+```
+
+Es necesario usar `int()` al rededor de `input("mensaje")`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Otras funciones útiles
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Función `round()`
+
+- **Descripción**: Redondea un número al número de decimales especificado.
+
+- **Ejemplo**:
+
+```python
+numero = 3.14159
+print(round(numero, 2)) # Imprime 3.14
+
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Función `abs()`
+
+- **Descripción**: Devuelve el valor absoluto de un número.
+
+- **Ejemplo**:
+
+```python
+numero = -5
+print(abs(numero)) # Imprime 5
+
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Funciones `min()` y `max()`
+
+- **Descripción**: Devuelven el valor mínimo y máximo de una serie de números.
+
+- **Ejemplo**:
+
+```python
+print(min(1, 2)) # Imprime 1
+print(max(3, 4)) # Imprime 4
+
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 1
+
+### Calcula el siguiente valor
+
+```python
+resultado = 2 + 3 * (2 ** 2) / 4
+print(resultado)
+
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución Ejercicio 1
+
+```python
+# Solución
+resultado = 2 + 3 * (2 ** 2) / 4
+print(resultado) # Imprime 5.0
+```
+
+**Recuerda**: Python usa PEMDAS para evaluar expresiones matemáticas.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 2
+
+### Calcula la raíz cuadrada de 16 usando operadores aritméticos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución Ejercicio 2
+
+```python
+# Solución
+resultado = 16 ** (1/2)
+print(resultado) # Imprime 4.0
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 3: Años perrunos
+
+Pregunta la edad de tu perro y calcula su edad en años humanos
+
+- Recuerda que un año perruno equivale a 7 años humanos.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución Ejercicio 3: Años perrunos
+
+```python
+edad_perro = int(input("¿Cuántos años tiene tu perro? "))
+edad_humana = edad_perro * 7
+print("La edad de tu perro en años humanos es:", edad_humana)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#1E1E1E" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
