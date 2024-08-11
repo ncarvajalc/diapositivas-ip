@@ -756,14 +756,14 @@ print(area_total) # Imprime 24.0
 
 ## Ejercicio 1: Definir e invocar
 
-Define una función `multiplicar(a, b)` que reciba dos números y devuelva su producto. Luego, invócala con los valores `3` y `4` y muestra el resultado.
+Define una función `multiplicar(a: int, b: int) -> int` que reciba dos números y devuelva su producto. Luego, invócala con los valores `3` y `4` y muestra el resultado.
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
 ## Solución Ejercicio 1
 
 ```python
-def multiplicar(a, b):
+def multiplicar(a: int, b: int) -> int:
     return a * b
 
 resultado = multiplicar(3, 4)
@@ -777,6 +777,22 @@ print(resultado)  # Imprime 12
 Define una función que tome como argumento dos números enteros, y devuelva el resultado de sumarlos y sacarles el 50%. Luego, reutiliza esa función en otra función que tome dos números enteros, calcule el producto usando la función anterior, y devuelva una cadena de texto que muestre el resultado en el formato: "La respuesta es X". Siendo X el resultado. Al final, llama a la segunda función con los valores 10 y 20 e imprime el resultado.
 
 El resultado debería ser: "La respuesta es 15.0"
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución Ejercicio 2
+
+```python
+def operacion(a: int, b: int) -> float:
+    return (a + b) * (50 / 100) # También se puede usar 0.5
+
+def mostrar_resultado(a: int, b: int) -> str:
+    resultado = operacion(a, b)
+    return "La respuesta es " + str(resultado)
+
+resultado = mostrar_resultado(10, 20)
+print(resultado)  # Imprime "La respuesta es 15.0"
+```
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
