@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Introducción a la programación
+#### Funciones
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- ¿Qué es una función en matemáticas?
+- Estructura básica de una función en Python
+- Comentarios en Python
+- Definir vs. Invocar funciones
+- `print` vs. `return`
+- Variables locales y su alcance
+- Reusabilidad y encapsulamiento
+- Ejercicios
+- Preguntas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# ¿Qué es una función en matemáticas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Recuerdan qué es una función en matemáticas?
+
+Una **función** en matemáticas se expresa como:
+
+`$f(x) = x^2$`
+
+- Toma un valor `x` como entrada.
+- Realiza una serie de operaciones.
+- Devuelve un valor como salida.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Recuerdan qué es una función en matemáticas?
+
+- Básicamente, es una **caja negra** que recibe un valor y devuelve otro.
+
+`$ \text{Entrada (x)} \rightarrow f(x) \rightarrow \text{Salida (y)} $`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Recuerdan qué es una función en matemáticas?
+
+- Así funcionan también las funciones en programación.
+- Reciben valores como entrada, realizan operaciones y devuelven un resultado.
+
+```python
+def cuadrado(x: float) -> float:
+    return x ** 2
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Estructura básica de una función en Python
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Estructura básica de una función en Python
+
+```python
+def nombre_funcion(param1: tipo, param2: tipo, ...) -> tipo:
+    resultado = ...
+
+    # Realizar operaciones
+    ...
+
+    return resultado
+```
+
+- **Parámetros**: Variables que recibe la función.
+- **Cuerpo**: Código que se ejecuta cuando la función es llamada.
+- **Retorno**: Devuelve un valor como resultado de la función.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Comentarios en Python
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Comentarios en Python
+
+- Los **comentarios** son líneas de código que Python ignora al ejecutar el programa.
+- Se utilizan para explicar lo que hace el código, facilitar la lectura y el mantenimiento.
+- Los comentarios de una línea comienzan con `#`.
+- Los comentarios de varias líneas se encierran entre `"""` o `'''`.
+
+```python
+"""
+Este es un comentario de varias líneas.
+Se usa para explicar varias líneas de código.
+"""
+def sumar(a: float, b: float) -> float:
+    return a + b  # Este es un comentario de una línea
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Definir vs. Invocar funciones
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Definir vs. Invocar funciones
+
+- **Definir**: Escribir la función con `def`.
+
+  ```python
+  def saludar(nombre: str) -> str:
+      return "Hola " + nombre
+  ```
+
+- **Invocar**: Llamar a la función para que se ejecute.
+
+  ```python
+  nombre = "Nico"
+  mensaje = saludar(nombre)
+  print(mensaje) # Imprime "Hola Nico"
+  ```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# `print` vs. `return`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## `print` vs. `return`
+
+- **`print()`**: Muestra un valor en la consola, pero no lo devuelve.
+- **`return`**: Devuelve un valor que puede ser usado más adelante en el programa.
+
+```python
+def sumar_con_print(a, b):
+    print(a + b)
+
+def sumar(a, b):
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado)   # Muestra el valor retornado
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[7]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph main
+    resultado_1[resultado_1: None]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[1]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph sumar_con_print
+    a[a:  None]
+    b[b:  None]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[1]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph sumar_con_print
+    a[a:  3]
+    b[b:  4]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[2]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph sumar_con_print
+    a[a:  3]
+    b[b:  4]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[3]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph sumar_con_print
+    a[a:  3]
+    b[b:  4]
+    return_value[return_value: None]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[7]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart LR
+subgraph sumar_con_print
+    a[a:  None]
+    b[b:  None]
+end
+subgraph main
+    resultado_1[resultado_1: None]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[7]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph main
+    resultado_1[resultado_1: None]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[8]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph main
+    resultado_1[resultado_1: None]
+    resultado_2[resultado_2: None]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[4]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph sumar
+    a2[a: None]
+    b2[b: None]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[4]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph sumar
+    a2[a: 3]
+    b2[b: 4]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[5]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph sumar
+    a2[a:  3]
+    b2[b:  4]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[6]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph sumar
+    a2[a:  3]
+    b2[b:  4]
+    return_value[return_value: 7]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[8]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart LR
+subgraph sumar
+    a2[a:  None]
+    b2[b:  None]
+end
+
+subgraph main
+    resultado_1[resultado_1: None]
+    resultado_2[resultado_2: 7]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[8]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart LR
+subgraph main
+    resultado_1[resultado_1: None]
+    resultado_2[resultado_2: 7]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[9]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph main
+    resultado_1[resultado_1: None]
+    resultado_2[resultado_2: 7]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Veámoslo en acción:
+
+
+```python[10]
+def sumar_con_print(a: int, b: int) -> None:
+    print(a + b)
+
+def sumar(a: int, b: int) -> int:
+    return a + b
+
+resultado_1 = sumar_con_print(3, 4)
+resultado_2 = sumar(3, 4)
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
+```
+
+
+<div class="mermaid">
+flowchart TD
+subgraph main
+    resultado_1[resultado_1: None]
+    resultado_2[resultado_2: 7]
+end
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Variables locales y su alcance
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Variables locales y su alcance
+
+- **Variables locales**: Son variables definidas dentro de una función.
+- **Alcance**: Solo existen y se pueden usar dentro de la función donde fueron definidas.
+
+```python
+def ejemplo():
+    numero = 10  # Variable local
+    return numero
+
+resultado = ejemplo()
+print(numero)  # Error: numero no está definida
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Reusabilidad y encapsulamiento
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Reusabilidad y encapsulamiento
+
+- **Reusabilidad**: Las funciones permiten reutilizar código sin tener que repetirlo.
+- **Encapsulamiento**: Las funciones ayudan a organizar el código en bloques más pequeños y manejables, cada uno con una responsabilidad clara.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Reusabilidad y encapsulamiento
+
+- ¿Recuerdan nuestro problema del área de la figura?
+
+<img src="area.png" alt="" style="object-fit: scale-down">
+
+¿Cuál es el área de la figura?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Reusabilidad y encapsulamiento
+
+```python
+def calcular_area_cuadrado(lado: float) -> float:
+    return lado * lado
+
+def calcular_area_triangulo(base: float, altura: float) -> float:
+    return (base * altura) / 2
+
+def calcular_area_total(lado_cuadrado: float, base_triangulo: float, altura_triangulo: float) -> float:
+    area_cuadrado = calcular_area_cuadrado(lado_cuadrado)
+    area_triangulo = calcular_area_triangulo(base_triangulo, altura_triangulo)
+    return area_cuadrado + area_triangulo
+
+area_total = calcular_area_total(4.0, 4.0, 4.0)
+print(area_total) # Imprime 24.0
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 1: Definir e invocar
+
+Define una función `multiplicar(a, b)` que reciba dos números y devuelva su producto. Luego, invócala con los valores `3` y `4` y muestra el resultado.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución Ejercicio 1
+
+```python
+def multiplicar(a, b):
+    return a * b
+
+resultado = multiplicar(3, 4)
+print(resultado)  # Imprime 12
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Ejercicio 2: Reutilizando funciones
+
+Define una función que tome como argumento dos números enteros, y devuelva el resultado de sumarlos y sacarles el 50%. Luego, reutiliza esa función en otra función que tome dos números enteros, calcule el producto usando la función anterior, y devuelva una cadena de texto que muestre el resultado en el formato: "La respuesta es X". Siendo X el resultado. Al final, llama a la segunda función con los valores 10 y 20 e imprime el resultado.
+
+El resultado debería ser: "La respuesta es 15.0"
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# ¿Preguntas?
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
