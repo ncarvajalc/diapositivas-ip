@@ -2,379 +2,259 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
     <title></title>
     <link rel="stylesheet" href="dist/reveal.css" />
     <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
     <link rel="stylesheet" href="plugin/highlight/monokai.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="plugin/customcontrols/style.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
 
-    <link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
 
     <script defer src="dist/fontawesome/all.min.js"></script>
 
-    <script type="text/javascript">
-      var forgetPop = true;
-      function onPopState(event) {
-        if (forgetPop) {
-          forgetPop = false;
-        } else {
-          parent.postMessage(event.target.location.href, "app://obsidian.md");
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
         }
-      }
-      window.onpopstate = onPopState;
-      window.onmessage = (event) => {
-        if (event.data == "reload") {
-          window.document.location.reload();
-        }
-        forgetPop = true;
-      };
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
 
-      function fitElements() {
-        const itemsToFit = document.getElementsByClassName("fitText");
-        for (const item in itemsToFit) {
-          if (Object.hasOwnProperty.call(itemsToFit, item)) {
-            var element = itemsToFit[item];
-            fitElement(element, 1, 1000);
-            element.classList.remove("fitText");
-          }
-        }
-      }
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
 
-      function fitElement(element, start, end) {
-        let size = (end + start) / 2;
-        element.style.fontSize = `${size}px`;
+		function fitElement(element, start, end){
 
-        if (Math.abs(start - end) < 1) {
-          while (element.scrollHeight > element.offsetHeight) {
-            size--;
-            element.style.fontSize = `${size}px`;
-          }
-          return;
-        }
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
 
-        if (element.scrollHeight > element.offsetHeight) {
-          fitElement(element, start, size);
-        } else {
-          fitElement(element, size, end);
-        }
-      }
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
 
-      document.onreadystatechange = () => {
-        fitElements();
-        if (document.readyState === "complete") {
-          if (window.location.href.indexOf("?export") != -1) {
-            parent.postMessage(event.target.location.href, "app://obsidian.md");
-          }
-          if (window.location.href.indexOf("print-pdf") != -1) {
-            let stateCheck = setInterval(() => {
-              clearInterval(stateCheck);
-              window.print();
-            }, 250);
-          }
-        }
-      };
-    </script>
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
   </head>
   <body>
     <div class="reveal">
-      <div class="slides">
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ### Introducción a la Programación
+### Introducción a la Programación
 
-            #### Nivel 1: Descubriendo el Mundo de la Programación
+#### Nivel 1: Descubriendo el Mundo de la Programación
 
-            *No veremos Python aún
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+*No veremos Python aún
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Agenda
+## Agenda
 
-            - Objetivos del Nivel 1
-            - Proceso de Resolución de Problemas
-            - Ambiente de Programación
-            - Ejemplos de Problemas
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Objetivos del Nivel 1
+- Proceso de Resolución de Problemas
+- Ambiente de Programación
+- Ejemplos de Problemas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            # Objetivos del Nivel 1
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+# Objetivos del Nivel 1
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## ¿Qué vamos a aprender en N1?
+## ¿Qué vamos a aprender en N1?
 
-            - Introducción a la resolución de problemas y la programación
-            - Ambiente de programación
-            - Variables y funciones
-            - Dividir y conquistar
-            - Especificación de problemas, soluciones y pruebas
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Introducción a la resolución de problemas y la programación
+- Ambiente de programación
+- Variables y funciones
+- Dividir y conquistar
+- Especificación de problemas, soluciones y pruebas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Nuestra Meta
+## Nuestra Meta
 
-            - Programar un computador para resolver problemas interesantes
-            - &shy;<!-- .element: class="fragment" data-fragment-index="1" -->¿Ustedes qué dirían que es un programa?
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Programar un computador para resolver problemas interesantes
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->¿Ustedes qué dirían que es un programa?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## ¿Qué es un programa?
+## ¿Qué es un programa?
 
-            > Un programa de computador es una serie de instrucciones que se ejecutan paso a paso desde un punto de partida
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+> Un programa de computador es una serie de instrucciones que se ejecutan paso a paso desde un punto de partida
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            # Proceso de Resolución de Problemas
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+# Proceso de Resolución de Problemas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Entendemos que...
+## Entendemos que...
 
-            - En este curso: Solucionar un problema es construir un programa
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- En este curso: Solucionar un problema es construir un programa
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ##### Seguiremos estos pasos
+##### Seguiremos estos pasos
 
 
 
-            <div class="mermaid">
-            graph TD
-                A[Análisis] --> B[Diseño]
-                B --> C[Construcción]
+<div class="mermaid">
+graph TD
+    A[Análisis] --> B[Diseño]
+    B --> C[Construcción]
 
 
-            </div>
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Análisis
+## Análisis
 
-            - Leer MUY bien
-            - Entender el problema
-            - Especificar el problema (qué tenemos, qué hacemos, a dónde queremos llegar)
-            - Resultado: especificación del problema: entradas, salidas y restricciones
-            - &shy;<!-- .element: class="fragment" data-fragment-index="1" -->**Básicamente**: Tengo que entender qué es lo que me están preguntando
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Leer MUY bien
+- Entender el problema
+- Especificar el problema (qué tenemos, qué hacemos, a dónde queremos llegar)
+- Resultado: especificación del problema: entradas, salidas y restricciones
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->**Básicamente**: Tengo que entender qué es lo que me están preguntando
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Diseño
+## Diseño
 
-            - Dividir el problema en subproblemas y buscar la solución para cada uno
-            - Expresar las soluciones como secuencias de pasos (algoritmo)
-            - Resultados: estrategia de solución y algoritmos
-            - &shy;<!-- .element: class="fragment" data-fragment-index="1" -->**Básicamente**: Hago un paso a paso de cómo resolver mi problema (sin código)
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Dividir el problema en subproblemas y buscar la solución para cada uno
+- Expresar las soluciones como secuencias de pasos (algoritmo)
+- Resultados: estrategia de solución y algoritmos
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->**Básicamente**: Hago un paso a paso de cómo resolver mi problema (sin código)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Construcción
+## Construcción
 
-            - Implementar el programa a partir del diseño
-            - Traducir los algoritmos a un lenguaje que comprenda el computador
-            - Probar su correcto funcionamiento
-            - Resultado: solución en un lenguaje de programación
-            - &shy;<!-- .element: class="fragment" data-fragment-index="1" -->**Básicamente**: Traducir a código (esto es lo más fácil)
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Implementar el programa a partir del diseño
+- Traducir los algoritmos a un lenguaje que comprenda el computador
+- Probar su correcto funcionamiento
+- Resultado: solución en un lenguaje de programación
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->**Básicamente**: Traducir a código (esto es lo más fácil)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Sobre los Algoritmos
+## Sobre los Algoritmos
 
-            - Un algoritmo es una secuencia de instrucciones para resolver un problema:
-              - &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Cómo fritar un huevo
-              - &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Su rutina mañanera
-              - &shy;<!-- .element: class="fragment" data-fragment-index="3" -->¿Se les ocurren otros?
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Un algoritmo es una secuencia de instrucciones para resolver un problema:
+  - &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Cómo fritar un huevo
+  - &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Su rutina mañanera
+  - &shy;<!-- .element: class="fragment" data-fragment-index="3" -->¿Se les ocurren otros?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Sobre los Algoritmos
+## Sobre los Algoritmos
 
-            - Los podemos expresar en lenguaje natural y traducirlos a un lenguaje de programación
-            - Son independientes del lenguaje de programación
-            - Describen un procedimiento que puede ser implementado en un lenguaje de programación o que podemos ejecutar a mano con lápiz y papel o con la ayuda de una calculadora
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Los podemos expresar en lenguaje natural y traducirlos a un lenguaje de programación
+- Son independientes del lenguaje de programación
+- Describen un procedimiento que puede ser implementado en un lenguaje de programación o que podemos ejecutar a mano con lápiz y papel o con la ayuda de una calculadora
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            # Ambiente de Programación
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+# Ambiente de Programación
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Entorno de Desarrollo (IDE)
+## Entorno de Desarrollo (IDE)
 
-            - Lenguaje de programación vs Entorno de desarrollo
-            - **Lenguaje de programación**: Lenguaje que se comunica con el computador
-            - **Entorno de desarrollo**: Editor de código, herramientas integradas
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Lenguaje de programación vs Entorno de desarrollo
+- **Lenguaje de programación**: Lenguaje que se comunica con el computador
+- **Entorno de desarrollo**: Editor de código, herramientas integradas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            # Ejemplos de Problemas
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+# Ejemplos de Problemas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Problema 1
+## Problema 1
 
-            Karel es un robot que solo puede hacer 4 cosas:
+Karel es un robot que solo puede hacer 4 cosas:
 
-            | **Acción**           | **Función**       |
-            |----------------------|-------------------|
-            | Girar a la izquierda | girar_izquierda() |
-            | Mover                | moverse()         |
-            | Recoger un cono      | recoger_cono()    |
-            | Poner un cono        | poner_cono()      |
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+| **Acción**           | **Función**       |
+|----------------------|-------------------|
+| Girar a la izquierda | girar_izquierda() |
+| Mover                | moverse()         |
+| Recoger un cono      | recoger_cono()    |
+| Poner un cono        | poner_cono()      |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Problema 1
+## Problema 1
 
-            <img src="Pasted image 20240807172343.png" alt="" style="object-fit: scale-down">
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+<img src="Pasted image 20240807172343.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Problema 2
+## Problema 2
 
-            Tengo la siguiente figura:
+Tengo la siguiente figura:
 
-            <img src="area.png" alt="" style="object-fit: scale-down">
+<img src="area.png" alt="" style="object-fit: scale-down">
 
-            ¿Cuál es el área de la figura?
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+¿Cuál es el área de la figura?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            ## Recuerda
+## Recuerda
 
-            - Un programa de computador es una serie de instrucciones que se ejecutan paso a paso desde un punto de partida
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+- Un programa de computador es una serie de instrucciones que se ejecutan paso a paso desde un punto de partida
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-            # Preguntas
-            </div>
-          </script>
-        </section>
-        <section data-markdown>
-          <script type="text/template">
-            <!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
-            <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
-
-            ## Tareas
-            - Leer Nivel 1: Empezando a programar (Sección 2.3)
-            - Lleguen con preguntas
-            </div>
-          </script>
-        </section>
-      </div>
+# Preguntas
+</div></script></section></div>
     </div>
 
     <script src="dist/reveal.js"></script>
@@ -384,11 +264,11 @@
     <script src="plugin/zoom/zoom.js"></script>
     <script src="plugin/notes/notes.js"></script>
     <script src="plugin/math/math.js"></script>
-    <script src="plugin/mermaid/mermaid.js"></script>
-    <script src="plugin/chart/chart.min.js"></script>
-    <script src="plugin/chart/plugin.js"></script>
-    <script src="plugin/customcontrols/plugin.js"></script>
-    <script src="plugin/reveal-pointer/pointer.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
 
     <script>
       function extend() {
@@ -404,31 +284,29 @@
         return target;
       }
 
-      function isLight(color) {
-        let hex = color.replace("#", "");
+	  function isLight(color) {
+		let hex = color.replace('#', '');
 
-        // convert #fff => #ffffff
-        if (hex.length == 3) {
-          hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
-        }
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
 
-        const c_r = parseInt(hex.substr(0, 2), 16);
-        const c_g = parseInt(hex.substr(2, 2), 16);
-        const c_b = parseInt(hex.substr(4, 2), 16);
-        const brightness = (c_r * 299 + c_g * 587 + c_b * 114) / 1000;
-        return brightness > 155;
-      }
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
 
-      var bgColor = getComputedStyle(document.documentElement)
-        .getPropertyValue("--r-background-color")
-        .trim();
-      var isLight = isLight(bgColor);
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
 
-      if (isLight) {
-        document.body.classList.add("has-light-background");
-      } else {
-        document.body.classList.add("has-dark-background");
-      }
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
 
       // default options to init reveal.js
       var defaultOptions = {
@@ -436,58 +314,47 @@
         progress: true,
         history: true,
         center: true,
-        transition: "default", // none/fade/slide/convex/concave/zoom
+        transition: 'default', // none/fade/slide/convex/concave/zoom
         plugins: [
           RevealMarkdown,
           RevealHighlight,
           RevealZoom,
           RevealNotes,
           RevealMath.MathJax3,
-          RevealMermaid,
-          RevealChart,
-          RevealCustomControls,
-          RevealPointer,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
         ],
 
-        allottedTime: 120 * 1000,
 
-        mathjax3: {
-          mathjax: "plugin/math/mathjax/tex-mml-chtml.js",
-        },
-        markdown: {
-          gfm: true,
-          mangle: true,
-          pedantic: false,
-          smartLists: false,
-          smartypants: false,
-        },
+    	allottedTime: 120 * 1000,
 
-        mermaid: {
-          theme: isLight ? "default" : "dark",
-        },
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
 
-        customcontrols: {
-          controls: [],
-        },
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
       };
 
       // options from URL query string
       var queryOptions = Reveal().getQueryHash() || {};
 
-      var options = extend(
-        defaultOptions,
-        {
-          width: 960,
-          height: 700,
-          margin: 0.04,
-          controls: true,
-          progress: true,
-          slideNumber: false,
-          transition: "slide",
-          transitionSpeed: "default",
-        },
-        queryOptions
-      );
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
     </script>
 
     <script>
