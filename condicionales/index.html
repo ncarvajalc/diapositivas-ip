@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Introducción a la Programación
+
+### Condicionales en Python
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- Uso del `if`
+- Uso del `if-else`
+- Uso del `if-elif-else`
+- Ejemplos prácticos de ejecución
+- Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### El condicional `if`
+
+El condicional `if` se utiliza para ejecutar un bloque de código solo si una condición es verdadera.
+
+###### Ejemplo en código:
+
+```python[7|1|2|3|4|5|7|8|9|1|2|3|5|9|10]
+def verificar_temperatura(temperatura: int) -> str:
+    mensaje = "Está frío."
+    if temperatura > 25:
+        mensaje = "Hace calor."
+    return mensaje
+
+resultado = verificar_temperatura(30)
+print(resultado)  # Muestra "Hace calor."
+resultado_2 = verificar_temperatura(-10)
+print(resultado_2)  # Muestra "Está frío."
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Diagrama de Flujo `if`:
+
+
+<div class="mermaid">
+flowchart TD
+    A[Inicio] --> B{Condición};
+    B -->|Verdadero| C[Ejecutar código];
+    B -->|Falso| D[Fin];
+    C --> D;
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### El condicional `if-else`
+
+El condicional `if-else` permite ejecutar un bloque de código si la condición es verdadera y otro bloque si es falsa.
+
+###### Ejemplo en código:
+
+```python[9|1|2|3|5|6|7|9|10|11|1|2|3|4|7|11|12]
+def verificar_mayoria_edad(edad: int) -> str:
+    mensaje = ""
+    if edad >= 18:
+        mensaje = "Eres mayor de edad."
+    else:
+        mensaje = "Eres menor de edad."
+    return mensaje
+
+resultado = verificar_mayoria_edad(16)
+print(resultado)  # Muestra "Eres menor de edad."
+resultado_2 = verificar_mayoria_edad(21)
+print(resultado_2)  # Muestra "Eres mayor de edad."
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Diagrama de Flujo `if-else`:
+
+
+<div class="mermaid">
+flowchart TD
+    A[Inicio] --> B{Condición};
+    B -->|Verdadero| C[Ejecutar código if];
+    B -->|Falso| D[Ejecutar código else];
+    C --> E[Fin];
+    D --> E;
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### El condicional `if-elif-else`
+
+El condicional `if-elif-else` se utiliza para manejar múltiples condiciones.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### El condicional `if-elif-else`
+
+###### Ejemplo en código:
+
+```python[15|1|2|3|5|7|8|13|15|16|17|1|2|3|5|7|9|11|12|13|17|18]
+def clasificar_puntuacion(puntuacion: int) -> str:
+    clasificacion = ""
+    if puntuacion == 5:
+        clasificacion = "Perfecto"
+    elif puntuacion >= 4:
+        clasificacion = "Excelente"
+    elif puntuacion >= 3.5:
+        clasificacion = "Bien"
+    elif puntuacion >= 3:
+        clasificacion = "Aceptable"
+    else:
+        clasificacion = "Será la próxima"
+    return clasificacion
+
+resultado = clasificar_puntuacion(3.5)
+print(resultado)  # Muestra "Bien"
+resultado_2 = clasificar_puntuacion(2.5)
+print(resultado_2)  # Muestra "Será la próxima"
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Diagrama de Flujo `if-elif-else`:
+
+
+<div class="mermaid">
+flowchart TD
+    A[Inicio] --> B{Condición 1};
+    B -->|Verdadero| C[Ejecutar código if];
+    B -->|Falso| D{Condición 2};
+    D -->|Verdadero| E[Ejecutar código elif];
+    D -->|Falso| F[Ejecutar código else];
+    C --> G[Fin];
+    E --> G;
+    F --> G;
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejemplo 1: Uso de solo `if`
+
+Cuando tengo que verificar todos los casos posibles.
+
+```python[9|1|2|3|5|6|7|9|10]
+def encontrar_menor(a: int, b: int, c: int) -> int:
+    menor = a
+    if b < menor:
+        menor = b
+    if c < menor:
+        menor = c
+    return menor
+
+resultado = encontrar_menor(5, 7, 3)
+print(resultado)  # Muestra 3
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejemplo 2: Uso de `if-else`
+
+Cuando tengo solo dos casos posibles.
+
+```python[9|1|2|3|5|6|7|9|10]
+def verificar_altura_persona(altura: int) -> str:
+    mensaje = ""
+    if altura >= 170:
+        mensaje = "Eres una persona alta."
+    else:
+        mensaje = "Eres una persona baja."
+    return mensaje
+
+resultado = verificar_altura_persona(160)
+print(resultado)  # Muestra "Eres una persona baja."
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Ejemplo 3: Uso de `if-elif-else`
+
+Cuando tengo múltiples casos, pero solo uno se ejecutará.
+
+```python[15|1|2|3|5|7|8|13|15|16]
+def clasificar_experiencia(anios_experiencia: int) -> str:
+    clasificacion = ""
+    if anios_experiencia >= 15:
+        clasificacion = "Maestro"
+    elif anios_experiencia >= 10:
+        clasificacion = "Experto"
+    elif anios_experiencia >= 5:
+        clasificacion = "Intermedio"
+    elif anios_experiencia >= 2:
+        clasificacion = "Junior"
+    else:
+        clasificacion = "Principiante"
+    return clasificacion
+
+resultado = clasificar_experiencia(9)
+print(resultado)  # Muestra "Intermedio"
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Ejercicio 1: Verificar la edad de mi perro
+
+Escribe una función que reciba la edad de tu perro en años humanos y determine si es mayor de edad. 
+
+- Puedes hacer uso de la función `anios_caninos`. Esta recibe un parámetro `edad_perro` y retorna un `int` con la edad en años humanos.
+- El retorno debe ser un `string` con el formato `"Tu perro es mayor de edad."` si la edad en años humanos es mayor o igual a 18.
+- Si no, debe retornar `"Tu perro es menor de edad."`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución del Ejercicio 1
+
+```python
+def verificar_edad_perro(edad_perro: int) -> str:
+    mensaje = ""
+    edad_humana = edad_perro * 7
+    if edad_humana >= 18:
+        mensaje = "Tu perro es mayor de edad."
+    else:
+        mensaje = "Tu perro es menor de edad."
+    return mensaje
+
+resultado = verificar_edad_perro(3)
+print(resultado)  # Muestra "Tu perro es menor de edad."
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 2: Encontrar el mayor entre 3 números
+
+Escribe una función que tome tres números y retorne cuál es el mayor. No está permitido usar la función `max`.
+
+- El retorno debe ser un `int` que representa el valor del mayor número entre los tres.
+- La función debe comparar los tres números y devolver el más grande de ellos.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución del Ejercicio 2
+
+```python
+def encontrar_mayor(a: int, b: int, c: int) -> int:
+    mayor = a
+    if b > mayor:
+        mayor = b
+    if c > mayor:
+        mayor = c
+    return mayor
+
+resultado = encontrar_mayor(3, 7, 5)
+print(resultado)  # Muestra 7
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<!-- .element: style="font-size: 0.9em" -->
+##### Ejercicio 3: Clasificación de puntajes
+
+- Escribe una función que clasifique una puntuación dada en "Perfecto", "Excelente", "Bien", "Aceptable", o "Será la próxima" usando `if-elif-else`.
+- El retorno debe ser un `string` con el siguiente formato:
+  - "Perfecto" si la puntuación es 5.
+  - "Excelente" si la puntuación es mayor o igual a 4.
+  - "Bien" si la puntuación es mayor o igual a 3.5.
+  - "Aceptable" si la puntuación es mayor o igual a 3.
+  - "Será la próxima" si la puntuación es menor a 3.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución del Ejercicio 3
+
+```python
+def clasificar_puntuacion(puntuacion: int) -> str:
+    clasificacion = ""
+    if puntuacion == 5:
+        clasificacion = "Perfecto"
+    elif puntuacion >= 4:
+        clasificacion = "Excelente"
+    elif puntuacion >= 3.5:
+        clasificacion = "Bien"
+    elif puntuacion >= 3:
+        clasificacion = "Aceptable"
+    else:
+        clasificacion = "Será la próxima"
+    return clasificacion
+
+resultado = clasificar_puntuacion(4.2)
+print(resultado)  # Muestra "Excelente"
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# ¿Preguntas?
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
