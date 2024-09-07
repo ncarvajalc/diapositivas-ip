@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Introducción a la Programación
+
+### Más sobre cadenas de caracteres
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Sucesión de caracteres
+
+- Una cadena de caracteres es una **secuencia ordenada** de elementos del tipo **chr** (character).
+- Un **chr** es un carácter único: una letra, número, o símbolo.
+- Sobre las cadenas de caracteres se pueden realizar diferentes operaciones para manipularlas y extraer información.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Función `len()` en strings
+
+- La función `len()` devuelve la **longitud** (número de caracteres) de una cadena.
+
+```python
+cadena1 = "hola"
+cadena2 = "¡Bienvenidos!"
+
+print(len(cadena1))  # 4
+print(len(cadena2))  # 13
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Operador `in` en cadenas de caracteres
+
+- El operador `in` comprueba si un **subconjunto** de caracteres está presente en la cadena.
+
+```python
+cadena1 = "gato"
+cadena2 = "grrrr"
+
+if (
+    "a" in cadena1
+    or "e" in cadena1
+    or "i" in cadena1
+    or "o" in cadena1
+    or "u" in cadena1
+):
+    print("Hay vocales en 'gato'.")
+else:
+    print("No hay vocales en 'gato'.")
+
+if (
+    "a" in cadena2
+    or "e" in cadena2
+    or "i" in cadena2
+    or "o" in cadena2
+    or "u" in cadena2
+):
+    print("Hay vocales en 'grrrr'.")
+else:
+    print("No hay vocales en 'grrrr'.")
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Operadores de comparación en cadenas: `<`, `>`, `==`
+
+- Las cadenas se pueden comparar alfabéticamente con los operadores `<`, `>`, `==`.
+
+```python
+cadena1 = "abeja"
+cadena2 = "zapato"
+
+print(cadena1 < cadena2)  # True, "abeja" viene antes que "zapato"
+print(cadena1 == "abeja") # True
+print(cadena1 > "abajo")  # True, "abeja" es mayor que "abajo"
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Cadenas de texto son inmutables
+
+- Las cadenas de texto no pueden ser **modificadas** una vez creadas. Cualquier cambio genera una nueva cadena.
+
+```python
+cadena = "hola"
+cadena.upper() # Función que me convierte todas las letras a mayúsculas
+print(cadena)  # "hola"
+
+cadena = cadena.upper()
+print(cadena) # "HOLA"
+```
+
+Es importante recordar que siempre se debe asignar a una nueva variable, ya que no se pueden modificar directamente.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Manipulación de cadenas con `lower()`, `upper()`, `title()`, `swapcase()`
+
+- Métodos comunes para cambiar el **formato** de una cadena. Observa que la cadena original no cambia.
+
+```python
+cadena = "Python es genial"
+
+cadena_lower = cadena.lower()     # python es genial
+cadena_upper = cadena.upper()     # PYTHON ES GENIAL
+cadena_title = cadena.title()     # Python Es Genial
+cadena_swapcase = cadena.swapcase()  # pYTHON ES GENIAL
+
+print(cadena) # Python es genial
+print(cadena_lower) # python es genial
+print(cadena_upper) # PYTHON ES GENIAL
+print(cadena_title) # Python Es Genial
+print(cadena_swapcase) # pYTHON ES GENIAL
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Manipulación de texto con `replace()`
+
+- El método `replace()` permite **reemplazar** partes de una cadena con otra. La cadena original no cambia.
+
+```python
+cadena = "analisis de datos"
+
+cadena_sin_a = cadena.replace("a", "")  # "nlisis de dtos"
+cadena_cambiada = cadena.replace("analisis", "estudio")  # "estudio de datos"
+
+print(cadena_sin_a) # nlisis de dtos
+print(cadena_cambiada) # estudio de datos
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Función `count()` en strings
+
+- La función `count()` devuelve el **número de veces** que un carácter o substring aparece en la cadena.
+
+```python
+cadena = "banana"
+
+cantidad_a = cadena.count("a")  # 3
+cantidad_na = cadena.count("na") # 2
+
+print(cantidad_a)
+print(cantidad_na)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Usando `f-strings` en Python
+
+- Las **f-strings** permiten incluir expresiones dentro de una cadena.
+
+```python
+nombre = "Nico"
+edad = 23
+
+saludo = f"Hola, me llamo {nombre} y tengo {edad} años."
+print(saludo)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejercicio 1: Comprobar vocales en una cadena
+
+Escribe una función llamada `contiene_todas_vocales` que reciba una cadena como parámetro y devuelva un valor booleano indicando si la cadena contiene todas las vocales (a, e, i, o, u).
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Solución ejercicio 1
+
+```python
+def contiene_todas_vocales(cadena: str) -> bool:
+    return "a" in cadena and "e" in cadena and "i" in cadena and "o" in cadena and "u" in cadena
+
+cadena1 = "murcielago"
+cadena2 = "grrrr"
+
+print(contiene_todas_vocales(cadena1))  # True
+print(contiene_todas_vocales(cadena2))  # False
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejercicio 2: Modificar una cadena
+
+Escribe una función llamada `modificar_cadena` que reciba una cadena como parámetro, transforme esa cadena a mayúsculas y luego reemplace todas las vocales por el símbolo `*`. La función debe devolver la cadena modificada.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Solución ejercicio 2
+
+```python
+def modificar_cadena(cadena: str) -> str:
+    cadena_modificada = cadena.upper()
+    cadena_modificada = cadena_modificada.replace("A", "*").replace("E", "*").replace("I", "*").replace("O", "*").replace("U", "*")
+    return cadena_modificada
+
+cadena = "hola mundo"
+print(modificar_cadena(cadena))  # H*L* M*ND*
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejercicio 3: Contar ocurrencias de una palabra
+
+Escribe una función llamada `contar_palabra` que reciba como parámetros una oración y una palabra. La función debe devolver cuántas veces aparece la palabra en la oración.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Solución ejercicio 3
+
+```python
+def contar_palabra(oracion: str, palabra: str) -> int:
+    return oracion.count(palabra)
+
+oracion = "Python es genial. Python es fácil. Python es poderoso."
+palabra = "Python"
+
+print(contar_palabra(oracion, palabra))  # 3
+```
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
