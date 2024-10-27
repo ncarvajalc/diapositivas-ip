@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Carga de datos en Python
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Paso 1: Entender los datos a cargar
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Paso 1: Explorar los datos a cargar
+
+<img src="Pasted image 20241027122244.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Paso 2: Analizar la estructura en la que se va a cargar la información
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Paso 2: Analizar la estructura en la que se va a cargar la información
+
+```python
+{"Antioquia": [
+   {
+    "nombre": "Medellín", "habitantes": 2569000, "area": 382,
+    "altitud": 1495},
+   {
+    "nombre": "Bello", "habitantes": 511200, "area": 142,
+    "altitud": 1450
+   },
+   ...
+ ],
+ "Cundinamarca": [
+   {"nombre": "Chía", "habitantes": 129997, ...}, ...
+ ],
+}
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+1. Iniciar con un diccionario vacío donde voy a tener unas llaves y unos valores:
+	- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Llaves
+		- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Nombre departamentos
+	- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->Valores
+		- &shy;<!-- .element: class="fragment" data-fragment-index="4" -->Listas de municipios
+
+```python
+departamentos = {}
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+2. Abrir el archivo en modo lectura para leer los datos y leer la primera línea del archivo
+
+```python
+archivo = open(ruta_archivo, "r", encoding="utf-8")
+titulos = archivo.readline().strip().split(",")
+```
+```
+-> departamento,municipio,habitantes,area,altitud
+   Antioquia,Medellín,2569000,382,1495
+   Antioquia,Bello,511200,142,1450
+   Antioquia,Envigado,228848,79,1750
+   ...
+```
+
+¿Qué hacía `.strip() y .split(",")` en una cadena?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+- `.strip()` me quita los espacios y saltos de línea de una cadena
+
+```python
+cadena_sin_espacios_ni_saltos = "...,area,altitud\n".strip()
+print(cadena_sin_espacios_ni_saltos) # "...,area,altitud"
+```
+
+- `.split(",")` me retorna una lista de cadenas de caracteres donde cada elemento está delimitado por el separador que paso por parámetro
+
+```python
+linea = "departamento,municipio,habitantes,area,altitud"
+titulos = linea.split(",")
+print(titulos) #["departamento","municipio","habitantes",...]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+3.  **Leer el resto de líneas del archivo** y por cada una de ellas agregar el municipio al diccionario
+
+```python
+linea = archivo.readline()
+# Tengo que repetir esto de alguna forma
+```
+```
+   departamento,municipio,habitantes,area,altitud
+-> Antioquia,Medellín,2569000,382,1495
+   Antioquia,Bello,511200,142,1450
+   Antioquia,Envigado,228848,79,1750
+   ...
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+3. **Leer el resto de líneas del archivo** y por cada una de ellas agregar el municipio al diccionario
+
+```python
+linea = archivo.readline()
+while len(linea) > 0: # También puede ser `linea != ""`
+
+	# Obtener los datos del municipio
+	
+	# Construir la estructura del municipio
+	
+	# Agregarlo al departamento que corresponda
+
+	linea = archivo.readline() # Pasar a la siguiente línea
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+3. Leer el resto de líneas del archivo y **por cada una de ellas agregar el municipio al diccionario**
+
+```python
+linea = archivo.readline()
+while len(linea) > 0: 
+
+	# Obtener los datos del municipio
+	datos = linea.strip().split(",")
+	
+	...
+
+	linea = archivo.readline() # Pasar a la siguiente línea
+```
+
+```
+-> Antioquia,Medellín,2569000,382,1495
+```
+```python
+["Antioquia","Medellín","2569000","382","1495"]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+3. Leer el resto de líneas del archivo y **por cada una de ellas agregar el municipio al diccionario**
+
+```python
+linea = archivo.readline()
+while len(linea) > 0: 
+
+	# Obtener los datos del municipio
+	datos = linea.strip().split(",")
+	nombre_departamento = datos[0]
+	...
+
+	linea = archivo.readline() # Pasar a la siguiente línea
+```
+
+```
+-> Antioquia,Medellín,2569000,382,1495
+```
+```python
+["Antioquia","Medellín","2569000","382","1495"]
+      0          1          2       3      4
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+###### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+3. Leer el resto de líneas del archivo y **por cada una de ellas agregar el municipio al diccionario**
+
+```python
+linea = archivo.readline()
+while len(linea) > 0: 
+	# Obtener los datos del municipio
+	...
+	# Construir la estructura del municipio
+	municipio = {
+		"nombre": datos[1],
+		"habitantes": int(datos[2]),
+		"area": float(datos[3]),
+		"altitud": int(datos[4]),
+    }
+	...
+
+	linea = archivo.readline() # Pasar a la siguiente línea
+```
+
+```python
+["Antioquia","Medellín","2569000","382","1495"]
+      0          1          2       3      4
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+###### Paso 3: Pensar el paso a paso de cómo cargar la información en esa estructura objetivo
+
+###### 3. Leer el resto de líneas del archivo y **por cada una de ellas agregar el municipio al diccionario**
+
+```python
+linea = archivo.readline()
+while len(linea) > 0: 
+	# Obtener los datos del municipio
+	...
+	nombre_departamento = datos[0]
+	# Construir la estructura del municipio
+	...
+	# Agregarlo al departamento que corresponda
+	if nombre_departamento in departamentos:
+        departamentos[nombre_departamento].append(municipio)
+	else:
+	    departamentos[nombre_departamento] = [municipio]
+
+	linea = archivo.readline() # Pasar a la siguiente línea
+```
+
+```python
+["Antioquia","Medellín","2569000","382","1495"]
+      0          1          2       3      4
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<img src="Pasted image 20241027150427.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Paso 4: Cerrar el archivo y retornar los departamentos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Paso 4: Cerrar el archivo y retornar los departamentos
+
+```python
+archivo.close()
+return departamentos
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Código completo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<img src="Pasted image 20241027150608.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
