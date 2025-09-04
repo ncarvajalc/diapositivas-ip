@@ -344,7 +344,7 @@ Escribe una función que reciba la edad de tu perro en años humanos y determine
 ```python
 def verificar_edad_perro(edad_perro: int) -> str:
     mensaje = ""
-    edad_humana = edad_perro * 7
+    edad_humana = anios_caninos(edad_perro)
     if edad_humana >= 18:
         mensaje = "Tu perro es mayor de edad."
     else:
@@ -352,7 +352,7 @@ def verificar_edad_perro(edad_perro: int) -> str:
     return mensaje
 
 resultado = verificar_edad_perro(3)
-print(resultado)  # Muestra "Tu perro es menor de edad."
+print(resultado)  # Muestra "Tu perro es mayor de edad."
 ```
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
@@ -384,22 +384,38 @@ print(resultado)  # Muestra 7
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
 <!-- .element: style="font-size: 0.9em" -->
-##### Ejercicio 3: Clasificación de Productos
+##### Ejercicio 3: Clasificación de puntajes
 
-- Escribe una función que clasifique un producto basado en su calificación de calidad, asignándole una de las siguientes categorías: "Premium", "Alta Calidad", "Calidad Media", "Básico", o "Deficiente" utilizando sentencias `if-elif-else`.
-El retorno debe ser un string con el siguiente formato:
-- "Premium" si la calificación es 10.
-- "Alta Calidad" si la calificación es mayor o igual a 8.
-- "Calidad Media" si la calificación es mayor o igual a 6.
-- "Básico" si la calificación es mayor o igual a 4.
-- "Deficiente" si la calificación es menor a 4.
+- Escribe una función que clasifique una puntuación dada en "Perfecto", "Excelente", "Bien", "Aceptable", o "Será la próxima" usando `if-elif-else`.
+- El retorno debe ser un `string` con el siguiente formato:
+  - "Perfecto" si la puntuación es 5.
+  - "Excelente" si la puntuación es mayor o igual a 4.
+  - "Bien" si la puntuación es mayor o igual a 3.5.
+  - "Aceptable" si la puntuación es mayor o igual a 3.
+  - "Será la próxima" si la puntuación es menor a 3.
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
 ## Solución del Ejercicio 3
 
-- Les dejo la solución a este ejercicio como ejercicio durante el laboratorio.
+```python
+def clasificar_puntuacion(puntuacion: int) -> str:
+    clasificacion = ""
+    if puntuacion == 5:
+        clasificacion = "Perfecto"
+    elif puntuacion >= 4:
+        clasificacion = "Excelente"
+    elif puntuacion >= 3.5:
+        clasificacion = "Bien"
+    elif puntuacion >= 3:
+        clasificacion = "Aceptable"
+    else:
+        clasificacion = "Será la próxima"
+    return clasificacion
 
+resultado = clasificar_puntuacion(4.2)
+print(resultado)  # Muestra "Excelente"
+```
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
