@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Tuplas
+
+*Estructuras para agrupar y organizar datos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- ¿Recuerdan las listas?
+- ¿Por qué usar tuplas?
+- Estructura de una tupla en Python
+- Tipo de dato y creación de tuplas
+- Casos especiales
+- Tuplas compuestas
+- Operaciones con tuplas
+- Tuplas como parámetros y retorno
+- Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Recuerdan las listas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Recuerdan las listas?
+
+Las listas tenían estas características:
+
+- Estructura de datos lineal
+- Cada elemento se identifica con un índice o posición
+- Pueden contener cualquier tipo de dato
+- Se pueden recorrer con ciclos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Pero había algo importante...
+
+```python
+numeros = [1, 2, 3, 4, 5]
+numeros[0] = 10
+print(numeros)  # [10, 2, 3, 4, 5]
+```
+
+<div class="callout callout-color1">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-info-circle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+Las listas son mutables
+
+</div>
+</div>
+<div class="callout-content">
+
+Podemos modificar, agregar o eliminar elementos después de crearlas
+
+</div>
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Listas vs Tuplas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Listas vs Tuplas
+
+| **Característica** | **Listas**                                                                    | **Tuplas**                                                                    |
+| ------------------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Estructura**     | Estructura de datos lineal <!-- .element: class="fragment" -->                | Estructura de datos lineal <!-- .element: class="fragment" -->                |
+| **Identificación** | Cada elemento se identifica con un índice <!-- .element: class="fragment" --> | Cada elemento se identifica con un índice <!-- .element: class="fragment" --> |
+| **Mutabilidad**    | Mutables: Modificables <!-- .element: class="fragment" -->                    | Inmutables: NO modificables <!-- .element: class="fragment" -->               |
+| **Sintaxis**       | Se definen con `[]` <!-- .element: class="fragment" -->                       | Se definen con `()` <!-- .element: class="fragment" -->                       |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Por qué usar tuplas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Por qué usar tuplas?
+
+1. **Protección de datos**: Cuando no queremos que los datos cambien accidentalmente
+
+```python
+coordenadas_origen = (0, 0)
+# coordenadas_origen[0] = 5  # Esto daría ERROR
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Por qué usar tuplas?
+
+2. **Mejor rendimiento**: Las tuplas son más rápidas y usan menos memoria que las listas
+
+3. **Claridad de intención**: Indican que los datos no deben cambiar
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Cuándo usar tuplas sobre listas?
+
+- Cuando los datos representan una estructura fija (coordenadas, fechas, colores RGB)
+- Cuando queremos retornar múltiples valores de una función
+- Cuando queremos asegurar que los datos no cambien
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Estructura de una tupla en Python
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Estructura de una tupla
+
+```python
+nombre_tupla = (elemento1, elemento2, elemento3, ...)
+```
+
+- Se usan paréntesis `()`
+- Los elementos se separan por comas
+- Pueden contener cualquier tipo de dato
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Tipo de dato
+
+```python
+punto = (3, 5)
+print(type(punto))  # <class 'tuple'>
+
+coordenadas = (1.5, 2.7, 3.2)
+print(type(coordenadas))  # <class 'tuple'>
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Creación de tuplas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Tupla tradicional
+
+```python
+colores_rgb = (255, 128, 0)
+estudiante = ("María", 20, "Ingeniería")
+numeros = (1, 2, 3, 4, 5)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Casos especiales: Tupla vacía
+
+```python
+tupla_vacia = ()
+print(tupla_vacia)  # ()
+print(len(tupla_vacia))  # 0
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Casos especiales: Tupla unitaria
+
+<div class="callout callout-color1">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-info-circle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+¡Cuidado con la coma!
+
+</div>
+</div>
+<div class="callout-content">
+
+Para crear una tupla con un solo elemento, necesitas una coma al final
+
+</div>
+</div>
+
+```python
+# Esto NO es una tupla, es solo un número
+no_es_tupla = (5)
+print(type(no_es_tupla))  # <class 'int'>
+
+# Esto SÍ es una tupla
+si_es_tupla = (5,)
+print(type(si_es_tupla))  # <class 'tuple'>
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### También se pueden crear sin paréntesis
+
+```python
+# Con paréntesis
+punto1 = (3, 5)
+
+# Sin paréntesis
+punto2 = 3, 5
+
+print(type(punto1))  # <class 'tuple'>
+print(type(punto2))  # <class 'tuple'>
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Tuplas compuestas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Tuplas con diferentes tipos de datos
+
+Las tuplas pueden contener cualquier tipo de dato:
+
+```python
+# Enteros y flotantes
+medidas = (10, 15.5, 20)
+
+# Strings
+nombres = ("Ana", "Luis", "Carlos")
+
+# Mezclados
+persona = ("Juan", 25, 1.75, True)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Tuplas con diccionarios
+
+```python
+estudiante = (
+    "María",
+    {"matematicas": 4.5, "fisica": 4.0},
+    20
+)
+
+print(estudiante[0])  # "María"
+print(estudiante[1])  # {"matematicas": 4.5, "fisica": 4.0}
+print(estudiante[1]["matematicas"])  # 4.5
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Tuplas anidadas (tuplas dentro de tuplas)
+
+```python
+# Rectángulo representado con tuplas
+x = 1.0
+y = 0.0
+ancho = 200
+alto = 100
+color = "rojo"
+rectangulo = ((x,y), (ancho, alto), color)
+
+print(rectangulo[0])  # (1.0, 0.0)
+print(rectangulo[1])  # (200, 100)
+print(rectangulo[2])  # "rojo"
+
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Representando cosas del mundo real
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 5%; top: 5%; height: 10%; width: 90%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+##### Ejemplo: Punto en el espacio tridimensional
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: undefined%; height: 90%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+```python
+# Un punto en (x,y,z)
+punto_3d = (5.0, 3.2, 7.8)
+
+x = punto_3d[0]  # 5.0
+y = punto_3d[1]  # 3.2
+z = punto_3d[2]  # 7.8
+```
+
+</div>
+
+<div class="" style="position: absolute; left: 50%; top: undefined%; height: 90%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+<img src="settings/assets/Pasted image 20251127212625.png" alt="" style="object-fit: scale-down">
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo: Fecha
+
+```python
+# Una fecha tiene (día, mes, año)
+fecha_nacimiento = (15, 8, 2004)
+
+dia = fecha_nacimiento[0]   # 15
+mes = fecha_nacimiento[1]   # 8
+año = fecha_nacimiento[2]   # 2004
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 5%; top: 5%; height: 10%; width: 90%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+##### Ejemplo: Color RGB
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: undefined%; height: 90%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+```python
+"""Un color RGB tiene
+(rojo, verde, azul)"""
+color_naranja = (255, 165, 0)
+color_morado = (128, 0, 128)
+
+rojo = color_naranja[0] # 255
+verde = color_naranja[1] # 165
+azul = color_naranja[2] # 0
+```
+
+</div>
+
+<div class="" style="position: absolute; left: 50%; top: undefined%; height: 90%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+<img src="settings/assets/Pasted image 20251127213139.png" alt="" style="object-fit: scale-down">
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Operaciones con tuplas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Acceso por índice
+
+```python
+frutas = ("manzana", "pera", "uva", "kiwi")
+
+print(frutas[0])   # "manzana"
+print(frutas[2])   # "uva"
+print(frutas[-1])  # "kiwi" (último elemento)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Slicing
+
+```python
+numeros = (10, 20, 30, 40, 50, 60)
+
+print(numeros[1:4])   # (20, 30, 40)
+print(numeros[:3])    # (10, 20, 30)
+print(numeros[3:])    # (40, 50, 60)
+print(numeros[::2])   # (10, 30, 50) - cada 2 elementos
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Función len()
+
+```python
+coordenadas = (5, 10, 15)
+print(len(coordenadas))  # 3
+
+tupla_vacia = ()
+print(len(tupla_vacia))  # 0
+
+estudiantes = ("Ana", "Luis", "María", "Carlos")
+print(len(estudiantes))  # 4
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Concatenación
+
+```python
+tupla1 = (1, 2, 3)
+tupla2 = (4, 5, 6)
+
+tupla_completa = tupla1 + tupla2
+print(tupla_completa)  # (1, 2, 3, 4, 5, 6)
+```
+
+<div class="callout callout-color1">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-info-circle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+Nota importante
+
+</div>
+</div>
+<div class="callout-content">
+
+Esto NO modifica las tuplas originales, crea una nueva tupla
+
+</div>
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Repetición
+
+```python
+patron = (0, 1)
+repetido = patron * 4
+print(repetido)  # (0, 1, 0, 1, 0, 1, 0, 1)
+
+base = ("x",)
+secuencia = base * 5
+print(secuencia)  # ("x", "x", "x", "x", "x")
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Pertenencia (operador in)
+
+```python
+colores = ("rojo", "azul", "verde", "amarillo")
+
+print("rojo" in colores)      # True
+print("morado" in colores)    # False
+print("azul" not in colores)  # False
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Empaquetado y Desempaquetado
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Empaquetado
+
+Agrupar varios valores en una tupla:
+
+```python
+# Empaquetado explícito
+coordenadas = (3, 5)
+
+# Empaquetado implícito (sin paréntesis)
+punto = 10, 20, 30
+
+print(type(punto))  # <class 'tuple'>
+print(punto)        # (10, 20, 30)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Desempaquetado
+
+Extraer los valores de una tupla en variables separadas:
+
+```python
+punto = (5, 10)
+
+# Desempaquetado
+x, y = punto
+
+print(x)  # 5
+print(y)  # 10
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Desempaquetado - Otro ejemplo
+
+```python
+fecha = (25, 12, 2024)
+
+dia, mes, año = fecha
+
+print(f"Día: {dia}")    # Día: 25
+print(f"Mes: {mes}")    # Mes: 12
+print(f"Año: {año}")    # Año: 2024
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¡Cuidado con el desempaquetado!
+
+```python
+coordenadas = (1, 2, 3)
+
+# Esto da ERROR - número incorrecto de variables
+x, y = coordenadas  # Error: too many values to unpack
+
+# Correcto - mismo número de variables que elementos
+x, y, z = coordenadas
+print(x, y, z)  # 1 2 3
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Tuplas como parámetros
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo: Función que recibe una tupla
+
+`$d = \sqrt{x+ y^2}$`
+
+```python
+def calcular_distancia_origen(punto: tuple[float, float]) -> float:
+    """
+    Calcula la distancia de un punto al origen (0,0)
+    punto: tupla con (x, y)
+    """
+    x, y = punto
+    distancia = (x**2 + y**2) ** 0.5
+    return distancia
+
+mi_punto = (3, 4)
+resultado = calcular_distancia_origen(mi_punto)
+print(resultado)  # 5.0
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo: Función con múltiples parámetros individuales
+
+```python
+def crear_rectangulo(ancho: int, alto: int, color: str) -> tuple[int, int, str]:
+    """
+    Crea una tupla que representa un rectángulo
+    """
+    rectangulo = (ancho, alto, color)
+    return rectangulo
+
+mi_rectangulo = crear_rectangulo(10, 5, "azul")
+print(mi_rectangulo)  # (10, 5, "azul")
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Tuplas como retorno
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Retornar múltiples valores
+
+```python
+def calcular_estadisticas(numeros: list[int]) -> tuple[int, int, float]:
+    """
+    Calcula el mínimo, máximo y promedio de una lista
+    Retorna: tupla con (minimo, maximo, promedio)
+    """
+    minimo = min(numeros)
+    maximo = max(numeros)
+    promedio = sum(numeros) / len(numeros)
+    return minimo, maximo, promedio
+
+datos = [10, 20, 30, 40, 50]
+min_v, max_v, prom = calcular_estadisticas(datos)
+print(f"Mínimo: {min_v}, máximo: {max_v}, promedio: {prom}")
+# Mínimo: 10, máximo: 50, promedio 30.0
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo práctico: Validación de credenciales
+
+```python
+def validar_credenciales(usuario: str, contraseña: str) -> tuple[bool, str]:
+    """
+    Valida las credenciales de un usuario
+    """
+    if len(contraseña) < 8:
+        return False, "Contraseña muy corta"
+    if usuario == "admin" and contraseña == "admin123":
+        return True, "Acceso concedido"
+    return False, "Credenciales incorrectas"
+
+# Uso de la función
+valido, mensaje = validar_credenciales("admin", "admin123")
+print(f"¿Válido? {valido}")  # ¿Válido? True
+print(f"Mensaje: {mensaje}") # Mensaje: Acceso concedido
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 1
+
+¿Cuál de las siguientes son tuplas válidas?
+
+```python
+a = (1, 2, 3)
+b = (5)
+c = (5,)
+d = ()
+e = 1, 2, 3
+f = ("hola", [1, 2], {"key": "value"})
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 1
+
+¿Cuál de las siguientes son tuplas válidas?
+
+```python
+a = (1, 2, 3)              # ✓ Tupla válida
+b = (5)                    # ✗ NO es tupla, es un int
+c = (5,)                   # ✓ Tupla unitaria válida
+d = ()                     # ✓ Tupla vacía válida
+e = 1, 2, 3                # ✓ Tupla válida (sin paréntesis)
+f = ("hola", [1, 2], {"key": "value"})  # ✓ Tupla válida
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 2
+
+¿Qué imprime el siguiente código?
+
+```python
+punto = (10, 20, 30)
+x, y, z = punto
+punto[0] = 15
+print(x + z)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 2
+
+¿Qué imprime el siguiente código?
+
+```python
+punto = (10, 20, 30)
+x, y, z = punto           # x=10, y=20, z=30
+punto[0] = 15             # ERROR: las tuplas son inmutables
+print(x + z)              # Esta línea nunca se ejecuta
+```
+
+**Respuesta**: El código genera un error porque intentamos modificar una tupla.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 3
+
+Completa la función para que retorne el primer y último elemento de una tupla:
+
+```python
+def obtener_extremos(tupla: tuple) -> tuple:
+    # Tu código aquí
+    pass
+
+numeros = (5, 10, 15, 20, 25)
+primero, ultimo = obtener_extremos(numeros)
+print(primero, ultimo)  # Debe imprimir: 5 25
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 3
+
+Completa la función para que retorne el primer y último elemento de una tupla:
+
+```python
+def obtener_extremos(tupla: tuple) -> tuple:
+    primero = tupla[0]
+    ultimo = tupla[-1]
+    return primero, ultimo
+
+numeros = (5, 10, 15, 20, 25)
+primero, ultimo = obtener_extremos(numeros)
+print(primero, ultimo)  # Imprime: 5 25
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 4
+
+¿Qué imprime el siguiente código?
+
+```python
+tupla1 = (1, 2)
+tupla2 = (3, 4)
+resultado = tupla1 + (tupla2 * 2)
+print(resultado)
+print(len(resultado))
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 4
+
+¿Qué imprime el siguiente código?
+
+```python
+tupla1 = (1, 2)
+tupla2 = (3, 4)
+resultado = tupla1 + (tupla2 * 2)  # (1,2) + (3,4,3,4)
+print(resultado)   # (1, 2, 3, 4, 3, 4)
+print(len(resultado))  # 6
+```
+
+**Explicación**:
+- `tupla2 * 2` crea `(3, 4, 3, 4)`
+- Luego se concatena con `tupla1`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 5
+
+Escribe una función que reciba una tupla de coordenadas 3D `(x, y, z)` y retorne una tupla con las coordenadas duplicadas:
+
+```python
+def duplicar_coordenadas(punto: tuple[int, int, int]) -> tuple[int, int, int]:
+    # Tu código aquí
+    pass
+
+punto_original = (2, 3, 5)
+punto_duplicado = duplicar_coordenadas(punto_original)
+print(punto_duplicado)  # Debe imprimir: (4, 6, 10)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 5
+
+Escribe una función que reciba una tupla de coordenadas 3D y retorne las coordenadas duplicadas:
+
+```python
+def duplicar_coordenadas(punto: tuple[int, int, int]) -> tuple[int, int, int]:
+    x, y, z = punto
+    return (x * 2, y * 2, z * 2)
+
+# Solución alternativa
+def duplicar_coordenadas_v2(punto: tuple[int, int, int]) -> tuple[int, int, int]:
+    x, y, z = punto
+    return x * 2, y * 2, z * 2
+
+punto_original = (2, 3, 5)
+punto_duplicado = duplicar_coordenadas(punto_original)
+print(punto_duplicado)  # Imprime: (4, 6, 10)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 6
+
+¿Qué resultado tiene el siguiente programa?
+
+```python
+datos = ("Ana", 20, "Ingeniería", (4.5, 4.0, 3.8))
+
+nombre, edad, carrera, notas = datos
+primera_nota, segunda_nota, tercera_nota = notas
+
+print(nombre)
+print(primera_nota)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Solución 6
+
+¿Qué resultado tiene el siguiente programa?
+
+```python [1-7|1|3|4|6-7]
+datos = ("Ana", 20, "Ingeniería", (4.5, 4.0, 3.8))
+
+nombre, edad, carrera, notas = datos
+# nombre="Ana", edad=20, carrera="Ingeniería", notas=(4.5,4.0,3.8)
+
+primera_nota, segunda_nota, tercera_nota = notas
+# primera_nota=4.5, segunda_nota=4.0, tercera_nota=3.8
+
+print(nombre)           # Imprime: Ana
+print(primera_nota)     # Imprime: 4.5
+```
+**Resultado**:
+```
+Ana
+4.5
+```
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
