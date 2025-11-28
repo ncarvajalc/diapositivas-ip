@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Matrices
+
+*Estructuras de datos bidimensionales para organizar información
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- ¿Qué es una matriz?
+- Representación gráfica
+- Matrices en Python
+- Acceso a elementos (doble indexación)
+- Recorridos con índices i y j
+- Creación de matrices
+- ¡Cuidado con las referencias!
+- Dimensiones de una matriz
+- Ejemplos de recorridos
+- Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué es una matriz?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Qué es una matriz?
+
+Una **matriz** es una estructura de datos bidimensional que organiza elementos en filas y columnas.
+
+<div class="callout callout-color1">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-info-circle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+Definición
+
+</div>
+</div>
+<div class="callout-content">
+
+Es como una tabla o una cuadrícula donde cada elemento tiene una posición definida por su fila y columna
+
+</div>
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Representación gráfica
+
+Matriz de 3 filas × 4 columnas:
+
+|            | Col 0 | Col 1 | Col 2 | Col 3 |
+| ---------- | ----- | ----- | ----- | ----- |
+| **Fila 0** | 1     | 2     | 3     | 4     |
+| **Fila 1** | 5     | 6     | 7     | 8     |
+| **Fila 2** | 9     | 10    | 11    | 12    |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo visual
+
+Pensemos en una matriz como un tablero de datos:
+
+| Estudiante | Parcial 1 | Parcial 2 | Parcial 3 |
+| ---------- | --------- | --------- | --------- |
+| Ana        | 4.5       | 4.0       | 4.2       |
+| Luis       | 3.8       | 4.5       | 4.0       |
+| María      | 5.0       | 4.8       | 4.9       |
+
+Cada celda tiene una **posición** (fila, columna)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Matrices en Python
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Cómo se representan en Python?
+
+En Python, una matriz es una **lista de listas**:
+
+```python
+# Matriz de 3 filas × 4 columnas
+matriz = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12]
+]
+```
+
+- Cada lista interna representa una **fila**
+- Todas las filas deben tener el mismo número de elementos (columnas)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Visualización de la estructura
+
+```python
+matriz = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]  
+]
+```
+
+| i/j       | j = 0 | j = 1 | j = 2 |
+| --------- | ----- | ----- | ----- |
+| **i = 0** | 1     | 2     | 3     |
+| **i = 1** | 4     | 5     | 6     |
+| i = 2     | 7     | 8     | 9     |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo con datos reales
+
+```python
+# Notas de estudiantes
+notas = [
+    [4.5, 4.0, 4.2],  # Ana
+    [3.8, 4.5, 4.0],  # Luis
+    [5.0, 4.8, 4.9]   # María
+]
+
+# Matriz de un tablero de triqui
+tablero = [
+    ['X', 'O', 'X'],
+    ['O', 'X', 'O'],
+    ['X', 'X', 'O']
+]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Acceso a elementos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Doble indexación
+
+Para acceder a un elemento necesitamos **dos índices**:
+- El primero (i) indica la **fila**
+- El segundo (j) indica la **columna**
+
+```python
+matriz = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12]
+]
+
+elemento = matriz[i][j] # Fila i, columna j
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplos de acceso
+
+```python [1-5|7|8|9|10]
+matriz = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12]
+]
+
+print(matriz[0][0])  # 1  (fila 0, columna 0)
+print(matriz[0][3])  # 4  (fila 0, columna 3)
+print(matriz[1][2])  # 7  (fila 1, columna 2)
+print(matriz[2][1])  # 10 (fila 2, columna 1)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Visualización del acceso
+
+| i/j       | j = 0        | j = 1         | j = 2         | j = 3         |
+| ------------- | ------------ | ------------- | ------------- | ------------- |
+| **i=0** | `(0,0)` | `(0,1)`  | `(0,2)`  | `(0,3)`  |
+| **i=1** | `(1,0)` | `(1,1)`  | `(1,2)`  | `(1,3)`  |
+| **i=2** | `(2,0)` | `(2,1)` | `(2,2)` | `(2,3)` |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Modificación de elementos
+
+```python [1-5|7-8|9]
+matriz = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+# Cambiar el valor de la fila 1, columna 2
+matriz[1][2] = 100
+print(matriz[1])  # [4, 5, 100]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Recorridos con índices i y j
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Por qué usar índices i y j?
+
+Para procesar todos los elementos de una matriz necesitamos:
+- **i**: índice de fila (número de fila)
+- **j**: índice de columna (número de columna)
+
+Usamos **ciclos anidados** para recorrer todas las posiciones
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Recorrido básico con for
+
+```python [1-5|7-9]
+matriz = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+for i in range(len(matriz)):           # Recorre filas
+    for j in range(len(matriz[0])):    # Recorre columnas
+        print(f"Posición [{i}][{j}] = {matriz[i][j]}")
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Salida del recorrido
+
+```
+Posición [0][0] = 1
+Posición [0][1] = 2
+Posición [0][2] = 3
+Posición [1][0] = 4
+Posición [1][1] = 5
+Posición [1][2] = 6
+Posición [2][0] = 7
+Posición [2][1] = 8
+Posición [2][2] = 9
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Entendiendo los rangos
+
+```python
+matriz = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12]
+]
+
+# len(matriz) = 3 (número de filas)
+# len(matriz[0]) = 4 (número de columnas)
+
+for i in range(len(matriz)):    # i toma: 0, 1, 2
+    for j in range(len(matriz[0])): # j toma: 0, 1, 2, 3
+        print(matriz[i][j])
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Suma de todos los elementos
+
+```python [1-5|7-11|12]
+matriz = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+suma = 0
+for i in range(len(matriz)):
+    for j in range(len(matriz[0])):
+        suma += matriz[i][j]
+
+print(f"La suma total es: {suma}")  # 45
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Creación de matrices
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Matriz de ceros - Forma correcta
+
+Para crear una matriz de 3×4 llena de ceros:
+
+```python [1-5|8]
+# Creamos cada fila como una lista independiente
+matriz = [
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0]
+]
+
+print(matriz)  # [[0,0,0,0], [0,0,0,0], [0,0,0,0]]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Creación dinámica de matriz de ceros
+
+```python [1-7|9]
+# Crear una matriz de 3 filas × 4 columnas
+filas = 3
+columnas = 4
+matriz = []
+for i in range(filas):
+    fila = [0] * columnas
+    matriz.append(fila)
+
+print(matriz)  # [[0,0,0,0], [0,0,0,0], [0,0,0,0]]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¡Cuidado con las referencias!
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ERROR COMÚN: Matriz de referencias
+
+```python [1|3-7|8]
+fila = [0, 0, 0]
+
+# ¡ESTO ESTÁ MAL!
+matriz_incorrecta = []
+for i in range(3):
+    matriz_incorrecta.append(fila)
+
+print(matriz_incorrecta)  # [[0,0,0], [0,0,0], [0,0,0]]
+```
+
+¿Parece correcto? ¡Veamos qué pasa al modificar un elemento!
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### El problema con las referencias
+
+```python [1-7|8-9|10]
+fila = [0, 0, 0]
+matriz_incorrecta = []
+for i in range(3):
+    matriz_incorrecta.append(fila)
+
+# Modificamos un solo elemento
+matriz_incorrecta[0][0] = 1
+
+print(matriz_incorrecta)
+# [[1,0,0], [1,0,0], [1,0,0]]  ¡Cambió toda la columna!
+```
+
+<div class="callout callout-color5">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-exclamation-triangle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+¿Por qué pasa esto?
+
+</div>
+</div>
+<div class="callout-content">
+
+Todas las filas apuntan a la **misma lista** en memoria
+
+</div>
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Visualización del problema
+
+```python
+# Lo que creemos que tenemos:
+Fila 0: [0, 0, 0]  (lista independiente)
+Fila 1: [0, 0, 0]  (lista independiente)
+Fila 2: [0, 0, 0]  (lista independiente)
+
+# Lo que realmente tenemos:
+Fila 0: ────┐
+Fila 1: ────┼──> [0, 0, 0]  (misma lista)
+Fila 2: ────┘
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Otro ejemplo del error
+
+```python [1-2|4-9]
+# INCORRECTO
+matriz_mala = [[0] * 3] * 3
+
+# Esto crea 3 referencias a la misma fila
+matriz_mala[0][0] = 5
+print(matriz_mala)
+# [[5,0,0], [5,0,0], [5,0,0]]
+
+# ¡Todas las filas cambiaron!
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Solución correcta
+
+```python [1-6|8-9|10]
+# Crear una nueva lista en cada iteración
+matriz_correcta = []
+for i in range(3):
+    fila_nueva = [0, 0, 0]  # Nueva lista cada vez
+    matriz_correcta.append(fila_nueva)
+
+# Ahora modificamos un elemento
+matriz_correcta[0][0] = 1
+
+print(matriz_correcta)  # [[1,0,0], [0,0,0], [0,0,0]]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Dimensiones de una matriz
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Obtener el número de filas y columnas
+
+```python [1-5|7-8|10-11| 13-14]
+matriz = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12]
+]
+
+# Número de filas
+num_filas = len(matriz)
+
+# Número de columnas (longitud de la primera fila)
+num_columnas = len(matriz[0])
+
+print(f"Filas: {num_filas}")       # Filas: 3
+print(f"Columnas: {num_columnas}") # Columnas: 4
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejemplos de recorridos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Ejemplo 1: Recorrido total
+
+Imprimir todos los elementos de una matriz:
+
+```python [1-5|7-10]
+matriz = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+for i in range(len(matriz)):
+    for j in range(len(matriz[0])):
+        print(f"{matriz[i][j]}", end=" ")
+    print()  # Nueva línea después de cada fila
+```
+
+**Salida:**
+```
+1 2 3
+4 5 6
+7 8 9
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Ejemplo 2: Recorrido parcial con while
+
+Recorrer solo la primera mitad de filas y columnas:
+
+```python
+i = 0
+while i < len(matriz) // 2:  # La mitad de las filas
+    j = 0
+    while j < len(matriz[0]) // 2:  # La mitad de las columnas
+        print(matriz[i][j], end=" ")
+        j += 1
+    print()
+    i += 1
+```
+
+**Salida:**
+```
+1 2
+5 6
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo 3: Llenar diagonal de ceros
+
+Primero, observemos una matriz con su diagonal marcada:
+
+|            | j = 0      | j = 1      | j = 2      | j = 3      |
+| ---------- | ---------- | ---------- | ---------- | ---------- |
+| **i=0** | **[0][0]** | 2          | 3          | 4          |
+| **i=1** | 5          | **[1][1]** | 7          | 8          |
+| **i=2** | 9          | 10         | **[2][2]** | 12         |
+| **i=3** | 13         | 14         | 15         | **[3][3]** |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Pregunta para pensar
+
+> ¿Qué tienen en común los elementos de la diagonal en cuanto a sus índices?
+
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Respuesta: Todos tienen el mismo valor para `i` y `j`: `[0][0]`, `[1][1]`, `[2][2]`, `[3][3]`
+
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Es decir: **i == j**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Pregunta para pensar
+
+> ¿Lo podemos representar con un condicional?
+
+**Respuesta:** ¡Sí!
+
+```python
+if i == j:
+    # Estamos en la diagonal
+```
+<!-- .element: class="fragment" -->
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Implementación: Llenar diagonal de ceros
+
+```python[1-6|7-11|12-156]
+matriz = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+    [13, 14, 15, 16]
+]
+
+for i in range(len(matriz)):
+    for j in range(len(matriz[0])):
+        if i == j:
+            matriz[i][j] = 0
+# Resultado
+# [[0, 2, 3, 4],
+#  [5, 0, 7, 8],
+#  [9, 10, 0, 12],
+#  [13, 14, 15, 0]]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+###### Antes:
+| 1 | 2 | 3 | 4 |
+|---|---|---|---|
+| 5 | 6 | 7 | 8 |
+| 9 | 10 | 11 | 12 |
+| 13 | 14 | 15 | 16 |
+
+###### Después:
+| **0** | 2 | 3 | 4 |
+|---|---|---|---|
+| 5 | **0** | 7 | 8 |
+| 9 | 10 | **0** | 12 |
+| 13 | 14 | 15 | **0** |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+
+
+
+<!-- .slide: class="has-dark-background" data-background-color="#2E3440" -->
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 1
+
+Dada la siguiente matriz, ¿qué imprimen estas instrucciones?
+
+```python
+matriz = [
+    [10, 20, 30],
+    [40, 50, 60],
+    [70, 80, 90]
+]
+
+print(matriz[1][2])
+print(matriz[2][0])
+print(len(matriz))
+print(len(matriz[0]))
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 1
+
+```python
+matriz = [
+    [10, 20, 30],
+    [40, 50, 60],
+    [70, 80, 90]
+]
+
+print(matriz[1][2])    # 60 (fila 1, columna 2)
+print(matriz[2][0])    # 70 (fila 2, columna 0)
+print(len(matriz))     # 3 (número de filas)
+print(len(matriz[0]))  # 3 (número de columnas)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 2
+
+¿Qué imprime el siguiente código?
+
+```python
+matriz = [[1, 2], [3, 4], [5, 6]]
+
+for i in range(len(matriz)):
+    print(matriz[i][1])
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 2
+
+```python
+matriz = [[1, 2], [3, 4], [5, 6]]
+
+for i in range(len(matriz)):
+    print(matriz[i][1])  # Imprime la columna 1 de cada fila
+```
+
+**Salida:**
+```
+2
+4
+6
+```
+
+**Explicación:** Recorre todas las filas e imprime el segundo elemento (índice 1) de cada fila.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 3
+
+Completa la función para contar cuántos números pares hay en una matriz:
+
+```python
+def contar_pares(matriz: list) -> int:
+    # Tu código aquí
+    pass
+
+numeros = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+resultado = contar_pares(numeros)
+print(resultado)  # Debe imprimir: 4
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 3
+
+```python
+def contar_pares(matriz: list) -> int:
+    contador = 0
+    for i in range(len(matriz)):
+        for j in range(len(matriz[0])):
+            if matriz[i][j] % 2 == 0:
+                contador += 1
+    return contador
+
+numeros = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+resultado = contar_pares(numeros)
+print(resultado)  # Imprime: 4 (números: 2, 4, 6, 8)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 4
+
+Escribe una función que cree una matriz de `n×m` llena de un valor específico:
+
+```python
+def crear_matriz(filas: int, columnas: int, valor: int) -> list:
+    # Tu código aquí
+    pass
+
+matriz = crear_matriz(3, 4, 5)
+print(matriz)
+# Debe imprimir: [[5,5,5,5], [5,5,5,5], [5,5,5,5]]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 4
+
+```python
+def crear_matriz(filas: int, columnas: int, valor: int) -> list:
+    matriz = []
+    for i in range(filas):
+        fila = [valor] * columnas
+        matriz.append(fila)
+    return matriz
+
+matriz = crear_matriz(3, 4, 5)
+print(matriz)
+# [[5,5,5,5], [5,5,5,5], [5,5,5,5]]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 5
+
+Completa la función para llenar los bordes de una matriz cuadrada con 1 (formando la letra "O"):
+
+```python
+def llenar_bordes(matriz: list) -> None:
+    # Tu código aquí
+    pass
+
+# Matriz de 5×5 llena de ceros
+matriz = [...]
+llenar_bordes(matriz)
+# Debe quedar:
+# [[1,1,1,1,1],
+#  [1,0,0,0,1],
+#  [1,0,0,0,1],
+#  [1,0,0,0,1],
+#  [1,1,1,1,1]]
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 5
+
+```python
+def llenar_bordes(matriz: list) -> None:
+    # Llenar primera y última fila
+    for columna in range(len(matriz[0])):
+        matriz[0][columna] = 1
+        matriz[len(matriz) - 1][columna] = 1
+    # Llenar primera y última columna (filas intermedias)
+    for fila in range(1, len(matriz) - 1):
+        matriz[fila][0] = 1
+        matriz[fila][len(matriz[0]) - 1] = 1
+# Matriz de 5×5 llena de ceros
+matriz = [...]
+llenar_bordes(matriz)
+for fila in matriz:
+    print(fila)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Visualización
+Después (forma de "O"):
+
+| **1** | **1** | **1** | **1** | **1** |
+|---|---|---|---|---|
+| **1** | 0 | 0 | 0 | **1** |
+| **1** | 0 | 0 | 0 | **1** |
+| **1** | 0 | 0 | 0 | **1** |
+| **1** | **1** | **1** | **1** | **1** |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+
+
+
+<!-- .slide: class="has-dark-background" data-background-color="#2E3440" -->
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Bono
+
+¿Cómo llenarían el triángulo superior de una matriz?
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
