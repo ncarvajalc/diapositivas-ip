@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Visualizaciones con Pandas
+
+*Creando gráficas para entender nuestros datos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- Conceptos básicos de visualización
+- Histogramas
+- Diagramas de barras
+- Box-plots (Diagramas de caja)
+- Gráficas de dispersión
+- Matrices de dispersión
+- Subplots y múltiples gráficas
+- Recursos adicionales
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Conceptos básicos de visualización
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Elementos de una gráfica
+
+Toda gráfica tiene componentes importantes:
+
+- **Título**: Describe qué muestra la gráfica
+- **Ejes X y Y**: Los datos que se representan
+- **Etiquetas de ejes**: Nombres descriptivos
+- **Rangos**: Límites de valores mostrados
+- **Tipo de gráfico**: Histograma, barras, dispersión, etc.
+- **Esquema de colores**: Paleta visual
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Anatomía de una gráfica
+
+<img src="settings/assets/Pasted image 20251127233758.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+| Elemento      | Descripción                           |
+| ------------- | ------------------------------------- |
+| **Título**    | Identifica el contenido de la gráfica |
+| **Eje X**     | Variable independiente (horizontal)   |
+| **Eje Y**     | Variable dependiente (vertical)       |
+| **Etiquetas** | Nombres descriptivos de los ejes      |
+| **Rango**     | Valores mínimos y máximos mostrados   |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Histogramas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Qué es un histograma?
+
+Un **histograma** muestra la distribución de frecuencias de un conjunto de datos.
+
+<img src="settings/assets/Pasted image 20251127233938.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="callout callout-color1">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-info-circle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+Pregunta clave
+
+</div>
+</div>
+<div class="callout-content">
+
+¿Cuántas veces aparece cada valor (o rango de valores) en el conjunto de datos?
+
+</div>
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+Útil para:
+- Ver la distribución de datos
+- Identificar valores más comunes
+- Detectar patrones y anomalías
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Crear un histograma básico
+
+```python [1-2|4]
+# promedio es una Serie con calificaciones de películas
+promedio = valores['vote_average']
+
+promedio.plot(kind="hist", figsize=(10,4))
+```
+
+- `kind="hist"` indica que queremos un histograma
+- `figsize=(10,4)` define ancho y alto de la figura
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Sintaxis alternativa
+
+También podemos usar una función específica:
+
+```python [1|3]
+promedio = valores['vote_average']
+
+promedio.plot.hist(figsize=(10,4))
+```
+
+Es equivalente a usar `kind="hist"`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Parámetros del histograma
+
+```python [1-2]
+promedio.plot(kind="hist", figsize=(10,4),
+              xlim=(0,10), bins=10)
+```
+
+**Parámetros importantes:**
+- `xlim=(min, max)`: Rango del eje X
+- `ylim=(min, max)`: Rango del eje Y
+- `bins=N`: Número de grupos/barras
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo completo
+
+```python [1-3]
+promedio.plot(kind="hist", figsize=(10,4),
+              xlim=(0,10), ylim=(0, 15000), bins=10,
+              title="Promedio de votación")
+```
+
+- `title`: Establece el título de la gráfica
+- `xlim` y `ylim`: Definen los rangos visibles
+- `bins=10`: Divide los datos en 10 grupos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Cambiar el estilo visual
+
+```python [1|3-4]
+import matplotlib.pyplot as plt
+
+plt.style.use('seaborn-colorblind')
+promedio.plot(kind="hist", figsize=(10,4), bins=10)
+```
+
+Pandas usa estilos predefinidos de Matplotlib:
+- `'seaborn-colorblind'`
+- `'ggplot'`
+- `'dark_background'`
+- Y muchos más...
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Configuración avanzada: Etiquetas
+
+```python [1-3|5-6|7]
+ax = promedio.plot(kind="hist", figsize=(10,4),
+                   xlim=(0,10), ylim=(0, 15000), bins=10,
+                   title="Promedio de votación")
+
+ax.set_xlabel("Promedio puntaje obtenido", fontsize=9)
+ax.set_ylabel("Cantidad de Películas", fontsize=9)
+ax.xaxis.set_label_coords(0.5, -0.07)
+```
+
+- `ax` es un objeto AxesSubplot
+- Permite configurar etiquetas personalizadas
+- `set_label_coords()` ajusta la posición de etiquetas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Guardar la gráfica
+
+```python [1-3|5-6]
+ax = promedio.plot(kind="hist", figsize=(10,4),
+                   xlim=(0,10), bins=10,
+                   title="Promedio de votación")
+
+fig = ax.get_figure()
+fig.savefig("histograma.svg")
+```
+
+El formato depende de la extensión:
+- `.png`, `.jpg`, `.svg`, `.pdf`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Diagramas de barras
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Qué es un diagrama de barras?
+
+Un **diagrama de barras** muestra valores numéricos asociados a categorías.
+
+<img src="settings/assets/Pasted image 20251127234103.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+Ejemplo: Cantidad de películas por idioma
+
+| Idioma | Cantidad |
+|--------|----------|
+| Inglés | 450 |
+| Francés | 25 |
+| Español | 18 |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Crear un diagrama de barras
+
+```python [1|3-5]
+cantidades = muestra['original_language'].value_counts()
+
+cantidades.plot(kind="bar", figsize=(10, 3),
+                xlabel="Idiomas", ylabel="Cantidad películas",
+                title="Cantidad de películas por idioma")
+```
+
+- `kind="bar"` crea barras **verticales**
+- `xlabel` y `ylabel` establecen etiquetas de ejes
+- `fontsize="small"` controla el tamaño del texto
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Parámetros útiles
+
+```python [1-4]
+cantidades.plot(kind="bar", figsize=(10, 3),
+                fontsize="small",
+                xlabel="Idiomas", ylabel="Cantidad películas",
+                title="Cantidad de películas por idioma")
+```
+
+**Opciones de fontsize:**
+- `"small"`, `"medium"`, `"large"`
+- O un número: `fontsize=9`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Escala logarítmica
+
+Útil cuando hay grandes diferencias entre valores:
+
+```python [1-4]
+cantidades.plot(kind="bar", figsize=(10, 3),
+                xlabel="Idiomas", ylabel="Cantidad películas",
+                logy=True,
+                title="Cantidad de películas por idioma")
+```
+
+- `logy=True`: Escala logarítmica en el eje Y
+- `logx=True`: Escala logarítmica en el eje X
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Barras horizontales
+
+```python [1]
+cantidades.plot(kind="barh", figsize=(10, 6))
+```
+
+`kind="barh"` crea barras **horizontales**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Box-plots (Diagramas de caja)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Qué es un box-plot?
+
+Un **box-plot** (diagrama de caja) muestra la distribución estadística de datos:
+
+- **Mediana**: Línea central de la caja
+- **Cuartiles 25% y 75%**: Límites de la caja
+- **Mínimo y máximo**: Extremos de las líneas
+- **Outliers**: Puntos fuera del patrón
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Interpretación visual
+
+<img src="settings/assets/Pasted image 20251127234210.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Crear un box-plot
+
+```python
+muestra[ ['runtime', 'vote_average'] ].plot(kind="box")
+```
+
+Crea un box-plot para cada columna seleccionada
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Usar la función boxplot()
+
+```python [1-2]
+muestra'original_language', 'vote_average'.boxplot(
+    by="original_language", rot=45)
+```
+
+<div class="callout callout-color5">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-exclamation-triangle" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+Recomendación
+
+</div>
+</div>
+<div class="callout-content">
+
+Es mejor usar `.boxplot()`
+
+</div>
+</div>
+
+- `by`: Agrupar por una columna categórica
+- `rot`: Rotación de etiquetas (en grados)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Box-plots agrupados
+
+<img src="settings/assets/Pasted image 20251127234349.png" alt="" style="object-fit: scale-down">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+```python [1-2]
+muestra[ ['original_language', 'runtime', 'vote_average'] ].boxplot(
+    by="original_language", rot=45)
+```
+
+Crea múltiples box-plots agrupados por categoría:
+- Un sub-plot por cada columna numérica
+- Agrupados por la variable categórica
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Interpretación
+
+| Elemento            | Significado                   |
+| ------------------- | ----------------------------- |
+| **Caja ancha**      | Mayor dispersión de datos     |
+| **Caja estrecha**   | Datos más concentrados        |
+| **Mediana alta**    | Valores tienden a ser mayores |
+| **Muchos outliers** | Datos con valores atípicos    |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Gráficas de dispersión
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+###### ¿Qué es una gráfica de dispersión?
+
+Una **gráfica de dispersión** (scatter plot) muestra la relación entre dos variables numéricas.
+
+<img src="settings/assets/Pasted image 20251127234455.png" alt="" style="width: 600px; object-fit: fill">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+Cada punto representa un registro con coordenadas (x, y)
+
+Útil para:
+- Identificar correlaciones
+- Detectar patrones
+- Encontrar valores extremos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Crear una gráfica de dispersión
+
+```python [1-2]
+muestra.plot(kind="scatter", x='runtime',
+             y='revenue')
+```
+
+- `kind="scatter"` indica dispersión
+- `x`: Columna para el eje horizontal
+- `y`: Columna para el eje vertical
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Ejemplo con parámetros
+
+```python [1-3]
+muestra.plot(kind="scatter", x='runtime', y='revenue',
+             figsize=(10, 6), title="Duración vs Ingresos",
+             xlabel="Tiempo (minutos)", ylabel="Ingresos")
+```
+
+Todos los parámetros anteriores funcionan:
+- `figsize`, `title`, `xlabel`, `ylabel`
+- `xlim`, `ylim`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Gráficas múltiples
+
+<img src="settings/assets/Pasted image 20251127234613.png" alt="" style="width: 600px; object-fit: fill">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Superponer gráficas de dispersión
+
+```python [1-5|7-10|12]
+sub_plot = muestra.plot(kind="scatter",
+                        x='runtime', y='vote_average',
+                        color="DarkBlue",
+                        label="Runtime vs. Vote Average",
+                        xlim=(0,200), ylim=(0,10))
+
+sub_plot2 = muestra.plot(kind="scatter",
+                         x='runtime', y='popularity',
+                         color="Red", label="Runtime vs. Popularity",
+                         ax=sub_plot)
+
+sub_plot2.set_ylabel("Valor en Millones de COP")
+```
+
+- La segunda gráfica se construye **sobre** la primera
+- `ax=sub_plot` indica dónde dibujar
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Parámetros clave
+
+- `label`: Etiqueta para la leyenda
+- `ax`: Eje donde dibujar (para superponer)
+- `color`: Diferente para cada serie
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Personalización avanzada
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Cambiar el tamaño de la figura
+
+```python
+# Figura grande
+df.plot(kind="bar", figsize=(15, 8))
+
+# Figura pequeña
+df.plot(kind="hist", figsize=(6, 4))
+```
+
+`figsize=(ancho, alto)` en pulgadas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Títulos y etiquetas
+
+```python [1-4]
+ax = df.plot(kind="scatter", x='a', y='b',
+             title="Mi Gráfica",
+             xlabel="Eje Horizontal",
+             ylabel="Eje Vertical")
+```
+
+O configurar después:
+```python
+ax.set_title("Nuevo Título")
+ax.set_xlabel("Etiqueta X")
+ax.set_ylabel("Etiqueta Y")
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Rangos de ejes
+
+```python
+# Definir al crear la gráfica
+df.plot(kind="scatter", x='a', y='b',
+        xlim=(0, 100), ylim=(0, 50))
+
+# O después
+ax = df.plot(kind="scatter", x='a', y='b')
+ax.set_xlim(0, 100)
+ax.set_ylim(0, 50)
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Rotación de etiquetas
+
+```python
+# En gráficas de barras
+df.plot(kind="bar", rot=45)  # Rotar 45 grados
+
+# En box-plots
+df.boxplot(by='categoria', rot=90)  # Vertical
+```
+
+`rot` controla el ángulo de rotación
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Resumen de tipos de gráficas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Tabla resumen
+
+| Tipo | `kind` | Uso |
+|------|--------|-----|
+| Histograma | `"hist"` | Distribución de frecuencias |
+| Barras | `"bar"` | Valores categóricos |
+| Box-plot | `"box"` | Distribución estadística |
+| Dispersión | `"scatter"` | Relación entre 2 variables |
+| Línea | `"line"` | Tendencias en el tiempo |
+| Área | `"area"` | Acumulación en el tiempo |
+| Pastel | `"pie"` | Proporciones de un total |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Cuándo usar cada gráfica
+
+| Objetivo | Gráfica recomendada |
+|----------|---------------------|
+| Ver distribución | Histograma |
+| Comparar categorías | Barras |
+| Identificar outliers | Box-plot |
+| Buscar correlaciones | Dispersión |
+| Mostrar tendencias | Línea |
+| Ver proporciones | Pastel |
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Recursos adicionales
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Documentación oficial de Pandas
+
+**Guía completa de visualización:**
+[https://pandas.pydata.org/docs/user_guide/visualization.html](https://pandas.pydata.org/docs/user_guide/visualization.html)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 1
+
+Dado el siguiente DataFrame, crea un histograma de la columna `edad`:
+
+```python
+df = pd.DataFrame({
+    'nombre': ['Ana', 'Luis', 'María', 'Carlos', 'Pedro'],
+    'edad': [25, 30, 22, 35, 28]
+})
+
+# Tu código aquí
+```
+
+Requisitos: figsize de (8,4), 5 bins, título "Distribución de edades"
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 1
+
+```python [1-5|7-8]
+df = pd.DataFrame({
+    'nombre': ['Ana', 'Luis', 'María', 'Carlos', 'Pedro'],
+    'edad': [25, 30, 22, 35, 28]
+})
+
+df['edad'].plot(kind="hist", figsize=(8,4), bins=5,
+                title="Distribución de edades")
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 2
+
+Usando el mismo DataFrame, crea un diagrama de barras que muestre el conteo de edades:
+
+```python
+# Tu código aquí
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 2
+
+```python [1-2]
+conteo = df['edad'].value_counts()
+conteo.plot(kind="bar", title="Conteo de edades")
+```
+
+**Explicación:**
+- `value_counts()` cuenta la frecuencia de cada valor
+- `kind="bar"` crea el diagrama de barras
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 3
+
+Crea una gráfica de dispersión con estos datos:
+
+```python
+datos = pd.DataFrame({
+    'horas_estudio': [2, 4, 6, 8, 10],
+    'calificacion': [60, 70, 80, 85, 95]
+})
+
+# Tu código aquí
+```
+
+Usa `horas_estudio` en X y `calificacion` en Y
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 3
+
+```python [1-5|7-9]
+datos = pd.DataFrame({
+    'horas_estudio': [2, 4, 6, 8, 10],
+    'calificacion': [60, 70, 80, 85, 95]
+})
+
+datos.plot(kind="scatter", x='horas_estudio', y='calificacion',
+           title="Horas de estudio vs Calificación",
+           xlabel="Horas de estudio", ylabel="Calificación",
+           figsize=(8, 6))
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 4
+
+Crea un box-plot para visualizar la distribución de `vote_average`:
+
+```python
+df = pd.DataFrame({
+    'vote_average': [5.5, 6.0, 7.5, 8.0, 8.5, 9.0, 4.5, 7.0]
+})
+
+# Tu código aquí
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución 5
+
+```python [1-3|5-6]
+df = pd.DataFrame({
+    'vote_average': [5.5, 6.0, 7.5, 8.0, 8.5, 9.0, 4.5, 7.0]
+})
+
+df.plot(kind="box", title="Distribución de Votaciones",
+        ylabel="Promedio de Votación")
+```
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
