@@ -220,15 +220,16 @@ def sumar(a: float, b: float) -> float:
 - **`return`**: Devuelve un valor que puede ser usado más adelante en el programa.
 
 ```python
-def sumar_con_print(a, b):
+def sumar_con_print(a: int, b: int):
     print(a + b)
 
-def sumar(a, b):
+def sumar(a: int, b: int):
     return a + b
 
 resultado_1 = sumar_con_print(3, 4)
 resultado_2 = sumar(3, 4)
-print(resultado)   # Muestra el valor retornado
+print(resultado_1)   # Muestra None
+print(resultado_2)   # Muestra el valor retornado
 ```
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-auto-animate="true" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
@@ -253,7 +254,7 @@ print(resultado_2)   # Muestra el valor retornado
 <div class="mermaid">
 flowchart TD
 subgraph main
-    resultado_1[resultado_1: None]
+    resultado_1[resultado_1: No definido]
 end
 
 </div>
@@ -280,8 +281,8 @@ print(resultado_2)   # Muestra el valor retornado
 <div class="mermaid">
 flowchart TD
 subgraph sumar_con_print
-    a[a:  None]
-    b[b:  None]
+    a[a: No definido]
+    b[b: No definido]
 end
 
 </div>
@@ -393,8 +394,8 @@ print(resultado_2)   # Muestra el valor retornado
 <div class="mermaid">
 flowchart LR
 subgraph sumar_con_print
-    a[a:  None]
-    b[b:  None]
+    a[a: No definido]
+    b[b: No definido]
 end
 subgraph main
     resultado_1[resultado_1: None]
@@ -452,7 +453,7 @@ print(resultado_2)   # Muestra el valor retornado
 flowchart TD
 subgraph main
     resultado_1[resultado_1: None]
-    resultado_2[resultado_2: None]
+    resultado_2[resultado_2: No definido]
 end
 
 </div>
@@ -479,8 +480,8 @@ print(resultado_2)   # Muestra el valor retornado
 <div class="mermaid">
 flowchart TD
 subgraph sumar
-    a2[a: None]
-    b2[b: None]
+    a2[a: No definido]
+    b2[b: No definido]
 end
 
 </div>
@@ -592,8 +593,8 @@ print(resultado_2)   # Muestra el valor retornado
 <div class="mermaid">
 flowchart LR
 subgraph sumar
-    a2[a:  None]
-    b2[b:  None]
+    a2[a: No definido]
+    b2[b: No definido]
 end
 
 subgraph main
@@ -699,7 +700,7 @@ end
 - **Alcance**: Solo existen y se pueden usar dentro de la función donde fueron definidas.
 
 ```python
-def ejemplo():
+def ejemplo() -> int:
     numero = 10  # Variable local
     return numero
 
@@ -774,9 +775,17 @@ print(resultado)  # Imprime 12
 
 ##### Ejercicio 2: Reutilizando funciones
 
-Define una función que tome como argumento dos números enteros, y devuelva el resultado de sumarlos y sacarles el 50%. Luego, reutiliza esa función en otra función que tome dos números enteros, calcule el producto usando la función anterior, y devuelva una cadena de texto que muestre el resultado en el formato: "La respuesta es X". Siendo X el resultado. Al final, llama a la segunda función con los valores 10 y 20 e imprime el resultado.
+<div style="text-align: justify; font-size: 0.85em; line-height: 1.5;">
 
-El resultado debería ser: "La respuesta es 15.0"
+Define una función que reciba dos números enteros y retorne el **50 % de su suma**.
+
+Luego, crea otra función que reutilice la anterior para calcular el resultado y devuelva una cadena con el formato: **“La respuesta es X”**, donde <em>X</em> es el valor obtenido.
+
+Finalmente, llama a la segunda función con los valores 10 y 20 e imprime el resultado.
+
+El resultado que se imprime debería ser: <strong>"La respuesta es 15.0"</strong>
+
+</div>
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
