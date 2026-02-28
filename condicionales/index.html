@@ -99,6 +99,7 @@
 - Uso del `if`
 - Uso del `if-else`
 - Uso del `if-elif-else`
+- Condicionales anidados
 - Ejemplos prácticos de ejecución
 - Ejercicios
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
@@ -266,6 +267,84 @@ flowchart TD
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
+### Condicionales anidados
+
+Un condicional anidado es un `if` (o `if-else`) que se encuentra **dentro** de otro condicional.
+
+Se usan cuando una decisión depende de que otra condición ya haya sido verdadera.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Estructura del condicional anidado
+
+```python
+if condicion_1:
+    if condicion_2:
+        # Código si condición 1 y condición 2 son verdaderas
+    else:
+        # Código si condición 1 es verdadera pero
+        # condición 2 es falsa
+else:
+    # Código si condición 1 es falsa
+# Código a ejecutar después del condicional
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+###### Ejemplo en código:
+
+```python[12|1|2|3|4|6|7|10|12|13|14|1|2|3|8|9|10|14|15]
+def clasificar_numero(numero: int) -> str:
+    mensaje = ""
+    if numero >= 0:
+        if numero == 0:
+            mensaje = "Es cero."
+        else:
+            mensaje = "Es positivo."
+    else:
+        mensaje = "Es negativo."
+    return mensaje
+
+resultado = clasificar_numero(5)
+print(resultado)   # Muestra "Es positivo."
+resultado_2 = clasificar_numero(-3)
+print(resultado_2) # Muestra "Es negativo."
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+##### Diagrama de Flujo condicional anidado:
+
+<style>
+/* Make Mermaid diagrams larger on this slide */
+.reveal .mermaid svg {
+  height: auto !important;
+  margin-right: 400px;
+}
+</style>
+
+
+<div class="mermaid">
+flowchart TD
+    A[Inicio] --> B{Condición 1};
+    B -->|Verdadero| C{Condición 2};
+    B -->|Falso| F[Código si condición 1 es falsa];
+    C -->|Verdadero| D[Código si condición 1 y condición 2 es verdadera];
+    C -->|Falso| E[Código si solo condición 1 es verdadera];
+    D --> G[Fin];
+    E --> G;
+    F --> G;
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### ¿Cuándo usar condicionales anidados?
+
+- Cuando una condición solo tiene sentido si otra ya fue verificada.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
 ## Ejemplo 1: Uso de solo `if`
 
 Cuando tengo que verificar todos los casos posibles.
@@ -331,7 +410,7 @@ print(resultado)  # Muestra "Intermedio"
 
 #### Ejercicio 1: Verificar la edad de mi perro
 
-Escribe una función que reciba la edad de tu perro en años humanos y determine si es mayor de edad. 
+Escribe una función que reciba la edad de tu perro en años humanos y determine si es mayor de edad.
 
 - Puedes hacer uso de la función `anios_caninos`. Esta recibe un parámetro `edad_perro` y retorna un `int` con la edad en años humanos.
 - El retorno debe ser un `string` con el formato `"Tu perro es mayor de edad."` si la edad en años humanos es mayor o igual a 18.
