@@ -250,8 +250,111 @@ print(len(mi_diccionario))  # 2
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
 ## Ejercicios
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-### Vamos a mirarlos la próxima clase
+## Ejercicio 1
+
+Dado el siguiente diccionario que representa un estudiante:
+
+```python
+estudiante = {
+    "nombre": "Ana",
+    "edad": 20,
+    "carrera": "Ingeniería",
+    "promedio": 4.2
+}
+```
+
+1. Imprime el nombre y el promedio del estudiante.
+2. Actualiza la edad a `21`.
+3. Agrega la llave `"semestre"` con valor `3`.
+4. Imprime el número de llaves del diccionario.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución Ejercicio 1
+
+```python [1-6|8-9|11-12|14]
+estudiante = {
+    "nombre": "Ana",
+    "edad": 20,
+    "carrera": "Ingeniería",
+    "promedio": 4.2
+}
+
+print(estudiante["nombre"])   # Ana
+print(estudiante["promedio"]) # 4.2
+
+estudiante["edad"] = 21
+estudiante["semestre"] = 3
+
+print(len(estudiante))  # 5
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 2
+
+Escribe una función `obtener_valor` que reciba un diccionario y una llave con valores asociados `str`, y retorne el valor asociado a esa llave si existe, o `None` si no existe.
+
+- Parámetros: `diccionario: dict`, `llave: str`
+- Retorno: el valor asociado a la llave, es decir, un `str`
+
+```python
+# Ejemplo de uso
+agenda = {"lunes": "Matemáticas", "martes": "Física"}
+print(obtener_valor(agenda, "lunes"))    # Matemáticas
+print(obtener_valor(agenda, "viernes"))  # None
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución Ejercicio 2
+
+```python [1-5|7-9]
+def obtener_valor(diccionario: dict, llave: str) -> str:
+	respuesta = None
+    if llave in diccionario:
+        respuesta = diccionario[llave]
+    return respuesta
+
+agenda = {"lunes": "Matemáticas", "martes": "Física"}
+print(obtener_valor(agenda, "lunes"))    # Matemáticas
+print(obtener_valor(agenda, "viernes"))  # None
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ejercicio 3
+
+Escribe una función `contar_mayores` que reciba un diccionario donde las llaves son `"amigo_1"` y `"amigo_2"` (`str`) y los valores son edades (`int`), y retorne cuántas personas son mayores de edad.
+
+- Parámetros: `personas: dict`
+- Retorno: `int` con el conteo
+
+```python
+# Ejemplo
+grupo = {"amigo_1": 15, "amigo_2": 19}
+print(contar_mayores(grupo))  # 1
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Solución Ejercicio 3
+
+```python [1-7|9-10]
+def contar_mayores(personas: dict) -> int:
+    conteo = 0
+    if personas["amigo_1"] >= 18:
+		conteo += 1
+	if personas["amigo_2"] >= 18:
+		conteo += 1 
+    return conteo
+
+grupo = {"amigo_1": 21, "amigo_2": 19}
+print(contar_mayores(grupo))  # 2
+```
 </div></script></section></div>
     </div>
 
