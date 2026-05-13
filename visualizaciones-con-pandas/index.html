@@ -402,7 +402,7 @@ Crea un box-plot para cada columna seleccionada
 ### Usar la función boxplot()
 
 ```python [1-2]
-muestra'original_language', 'vote_average'.boxplot(
+muestra[ ['original_language', 'vote_average'] ].boxplot(
     by="original_language", rot=45)
 ```
 
@@ -614,16 +614,19 @@ df.boxplot(by='categoria', rot=90)  # Vertical
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
 ### Tabla resumen
+<div style="font-size: 0.65em;">
 
-| Tipo | `kind` | Uso |
-|------|--------|-----|
-| Histograma | `"hist"` | Distribución de frecuencias |
-| Barras | `"bar"` | Valores categóricos |
-| Box-plot | `"box"` | Distribución estadística |
-| Dispersión | `"scatter"` | Relación entre 2 variables |
-| Línea | `"line"` | Tendencias en el tiempo |
-| Área | `"area"` | Acumulación en el tiempo |
-| Pastel | `"pie"` | Proporciones de un total |
+| Tipo       | `kind`      | Uso                         |
+| ---------- | ----------- | --------------------------- |
+| Histograma | `"hist"`    | Distribución de frecuencias |
+| Barras     | `"bar"`     | Valores categóricos         |
+| Box-plot   | `"box"`     | Distribución estadística    |
+| Dispersión | `"scatter"` | Relación entre 2 variables  |
+| Línea      | `"line"`    | Tendencias en el tiempo     |
+| Área       | `"area"`    | Acumulación en el tiempo    |
+| Pastel     | `"pie"`     | Proporciones de un total    |
+
+</div>
 </div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
