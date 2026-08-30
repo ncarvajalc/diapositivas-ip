@@ -2,102 +2,133 @@
 
 ## Alcance del repositorio
 
-Este repositorio contiene las presentaciones de la primera mitad del curso Ingeniería de Software Moderna (ISM). Cada carpeta principal tiene un `index.html` generado desde un markdown de Obsidian mediante Advanced Slides.
+Este repositorio contiene las salidas HTML de las presentaciones de Ingeniería de Software Moderna (ISM). Los markdowns fuente viven en el vault de Obsidian, bajo `Diapositivas/Primera mitad/`, y Advanced Slides los exporta como presentaciones Reveal.js.
 
-Los markdowns fuente no están dentro de este repositorio. Se encuentran en el vault de Obsidian, bajo `Diapositivas/Primera mitad/`, organizados por semana y clase. La correspondencia actual es:
+El markdown es la fuente de verdad. No edites `index.html` para cambiar el contenido de una clase. La siguiente exportación desde Obsidian sobrescribirá esos cambios.
 
-| Markdown fuente | Salida publicada |
-| --- | --- |
-| `Primera mitad/S1/S1 - C1 - Bienvenida al curso y reglas de juego.md` | `bienvenida/index.html` |
-| `Primera mitad/S1/S1 - C2 - El proyecto.md` | `proyecto/index.html` |
-| `Primera mitad/S2/S2 - C1 - HTML, CSS y Bootstrap.md` | `html-css-bootstrap/index.html` |
-| `Primera mitad/S2/S2 - C2 - TypeScript.md` | `typescript/index.html` |
+## Estado actual del material
 
-El markdown fuente es la referencia para el contenido. Una edición manual del HTML se perderá cuando se vuelva a exportar desde Obsidian.
+| Markdown fuente | Tema | Salida HTML |
+| --- | --- | --- |
+| `Primera mitad/S1/S1 - C1 - Bienvenida al curso y reglas de juego.md` | Bienvenida, reglas y logística | `bienvenida/index.html` |
+| `Primera mitad/S1/S1 - C2 - El proyecto.md` | Proyecto, módulos y modelado inicial | `proyecto/index.html` |
+| `Primera mitad/S2/S2 - C1 - HTML, CSS y Bootstrap.md` | Fundamentos de frontend | `html-css-bootstrap/index.html` |
+| `Primera mitad/S2/S2 - C2 - TypeScript.md` | Tipado y fundamentos de TypeScript | `typescript/index.html` |
+| `Primera mitad/S3 y S4/S3 - C1 y C2 - Angular.md` | Angular, arquitectura frontend y práctica | `angular/index.html` |
+| `Primera mitad/S5/S5 - C1 - Backend y Arquitectura por capas.md` | Backend y arquitectura por capas | Aún no se ha exportado |
 
-## Contenido de las clases
+Actualmente hay cinco presentaciones HTML exportadas. La clase de Backend solo tiene la agenda y los encabezados principales. Trátala como material en preparación, no como contenido terminado.
+
+## Secuencia y contenido de las clases
 
 ### S1 C1: bienvenida y reglas de juego
 
-`bienvenida/index.html` presenta el curso, la construcción de comunidad y la logística. Incluye las reglas de asistencia y comunicación, la evaluación, el trabajo en grupos, la recolección de usuarios de GitHub, la política de uso de IA y las primeras tareas.
+Presenta el curso, construye comunidad y fija las reglas de trabajo. Incluye asistencia, comunicación, evaluación, trabajo en grupos, uso de GitHub, uso responsable de IA y las primeras tareas.
 
-Puntos del curso que aparecen en esta clase:
+Puntos del curso que deben conservarse:
 
 - La asistencia es obligatoria y exige al menos 80%.
 - Las inasistencias justificadas se reportan dentro de los tres días calendario siguientes.
 - La mayoría de las entregas se hace por GitHub.
 - El proyecto combina trabajo individual y grupal. Cada estudiante desarrolla el front y el back de un módulo funcional.
-- El uso de IA está permitido con restricciones. El trabajo manual de clase precede al uso de modelos, y las conversaciones o prompts pueden formar parte de los entregables.
+- El uso de IA está permitido con restricciones. Los prompts y conversaciones pueden formar parte de los entregables.
 - Algunas entregas pueden requerir sustentación oral.
 
 ### S1 C2: el proyecto
 
-`proyecto/index.html` explica cómo leer el enunciado y convertirlo en un diseño inicial del sistema. La clase cubre la creación de repositorios individuales y grupales en Classroom50, la identificación de entidades, atributos, relaciones y reglas de negocio, y el registro de supuestos cuando el enunciado es ambiguo.
+Explica cómo convertir el enunciado en un diseño inicial. Cubre repositorios individuales y grupales, entidades, atributos, relaciones, reglas de negocio, supuestos, prototipado estático con HTML y Bootstrap, módulos funcionales y diagramas de dominio y vista funcional.
 
-También introduce el prototipado de una interfaz estática con HTML y Bootstrap, la separación del sistema en módulos funcionales, los diagramas de dominio y de vista funcional, y la validación de los avances con el profesor. Las tareas incluyen un GIST público, la wiki del repositorio, los diagramas y las historias de usuario.
+Las tareas incluyen un GIST público, la wiki del repositorio, los diagramas y las historias de usuario. La validación con el profesor es un paso explícito antes de continuar.
 
 ### S2 C1: HTML, CSS y Bootstrap
 
-`html-css-bootstrap/index.html` introduce la historia breve de la Web y las responsabilidades de HTML, CSS y JavaScript.
+Introduce la Web y las responsabilidades de HTML, CSS y JavaScript. Luego presenta Bootstrap, sus componentes y su grilla de 12 columnas.
 
-- HTML aporta la estructura, la semántica y el DOM.
-- CSS define la apariencia de los elementos HTML.
-- JavaScript agrega interacción, modifica el DOM y puede consumir APIs.
-- Bootstrap ofrece clases y componentes reutilizables, además de una grilla de 12 columnas adaptable a distintos tamaños de pantalla.
+- HTML aporta estructura, semántica y DOM.
+- CSS define la apariencia.
+- JavaScript agrega comportamiento e interacción.
+- Bootstrap ofrece estilos y componentes reutilizables.
 
-La clase termina con documentación de Bootstrap y un bono para crear un sitio sobre un interés personal o un portafolio usando un GIST de referencia.
+La clase termina con un bono para construir un sitio propio o un portafolio usando Bootstrap y un GIST de referencia.
 
 ### S2 C2: TypeScript
 
-`typescript/index.html` parte de los problemas de tipado dinámico de JavaScript y presenta TypeScript como una capa de verificación previa a la ejecución. Explica que el navegador ejecuta JavaScript y que `tsc` revisa el código TypeScript y genera el archivo `.js`.
+Parte de los problemas del tipado dinámico de JavaScript y presenta TypeScript como verificación antes de ejecutar. Cubre `tsc`, tipos, inferencia, funciones, interfaces, uniones, condicionales, ciclos y operaciones sobre arreglos.
 
-Los ejemplos cubren tipos básicos, inferencia, funciones, objetos e interfaces, propiedades opcionales, uniones, estrechamiento con `typeof`, condicionales, ciclos, `forEach`, funciones flecha y `map`. La práctica conecta TypeScript con una página HTML, Bootstrap, un arreglo alojado en un GIST, `script.ts`, `tsconfig.json`, `tsc` y Live Server.
+La práctica conecta TypeScript con una página HTML, Bootstrap, un arreglo alojado en un GIST, `script.ts`, `tsconfig.json`, `tsc` y Live Server.
 
-## Organización de cada presentación
+### S3 y S4: Angular
 
-Cada una de las cuatro carpetas contiene:
+Continúa desde HTML, JavaScript y TypeScript para explicar por qué una interfaz grande necesita una estructura. Cubre frameworks de frontend, Angular, npm, Angular CLI, aplicaciones standalone, templates, estilos, componentes, modelos, `httpResource`, APIs externas y descomposición.
 
-- `index.html`, que contiene las diapositivas dentro de plantillas `data-markdown` y arranca Reveal.js.
+La arquitectura pedagógica de esta clase es:
+
+```text
+Usuario → vista → componente → capa de datos → API externa
+```
+
+El template muestra datos, emite eventos y controla qué se ve. El componente coordina la vista. La capa de datos realiza HTTP y puede ser un `httpResource` dentro del componente o un servicio dedicado. El API vive fuera de Angular.
+
+Por ahora, los GISTs simulan una fuente externa de solo lectura. La clase usa `httpResource` para lecturas y reserva creación, edición y eliminación con `HttpClient` para una etapa posterior. La práctica pide crear un proyecto Angular en el repositorio individual, definir tres modelos, configurar environments, instalar Bootstrap y adaptar el tutorial a las entidades del proyecto. La tarea asociada es el Release 1.
+
+### S5 C1: Backend y arquitectura por capas
+
+El markdown actual solo define la agenda: backend, arquitectura por capas, frameworks de backend y Spring Boot. Antes de exportarlo o ampliar sus instrucciones, completa el contenido de cada sección y valida que conecte con la arquitectura frontend presentada en Angular.
+
+## Organización de una presentación exportada
+
+Cada carpeta exportada contiene:
+
+- `index.html`, con las diapositivas y la inicialización de Reveal.js.
 - `css/`, con `layout.css`, `mattropolis.css` y `vs2015.css`.
 - `dist/`, con Reveal.js, temas, fuentes y Font Awesome.
-- `plugin/`, con los plugins de Reveal.js usados por la exportación.
-- Las imágenes específicas de esa clase, junto a `index.html`.
+- `plugin/`, con los plugins de Reveal.js usados por Advanced Slides.
+- Imágenes específicas de la clase junto a `index.html`.
 
-Los directorios `dist/` y `plugin/` son copias locales del runtime de Reveal.js y de sus plugins. Se repiten en cada presentación para que cada HTML pueda abrirse de forma autónoma. No son el contenido académico del curso.
+Los directorios `dist/` y `plugin/` son copias locales del runtime de Reveal.js. Se repiten en cada presentación para que pueda abrirse de manera autónoma. No son el contenido académico y no se deben editar salvo que el cambio requiera modificar el runtime compartido.
 
 ## Convenciones de autoría
 
-En los markdowns fuente:
+Los markdowns fuente siguen estas convenciones:
 
-- El frontmatter actual usa `bg: "#2E3440"` y `highlightTheme: monokai`.
+- El frontmatter usa `bg: "#2E3440"` y `highlightTheme: monokai`.
 - `---` separa las diapositivas.
-- El primer `#` identifica el título de la presentación y los `##` suelen identificar títulos de diapositivas.
-- Se usan bloques de código para ejemplos de HTML, JavaScript, TypeScript, shell y JSON.
-- Se usan diagramas Mermaid y enlaces Markdown.
-- Las imágenes se insertan con wikilinks de Obsidian, por ejemplo `![[nombre.png]]`. La exportación las convierte en referencias locales como `imagen.png`.
-- Algunas diapositivas usan HTML embebido y estilos inline para ajustar el tamaño del contenido. Hay que revisar esas diapositivas después de cualquier cambio.
+- El primer `#` es el título de la clase. Los `##` son títulos de diapositiva y los `###` organizan contenido dentro de una misma diapositiva.
+- Los bullets son recordatorios para la explicación oral, no un guion completo. Mantén una idea por diapositiva y evita párrafos largos.
+- El material se escribe principalmente en español. Conserva en inglés nombres de APIs, comandos, etiquetas HTML, tipos y mensajes de error.
+- Las clases alternan explicación corta, diagramas, capturas, demostraciones en vivo, práctica y preguntas.
+- Las diapositivas de demo dicen qué se verá en VSCode. No copies el paso a paso completo ni el código del demo a la presentación.
+- Usa bloques de código solo cuando la sintaxis misma sea parte del concepto que se está enseñando.
+- Usa Mermaid para explicar relaciones, flujo de datos, capas o árboles de componentes.
+- Las imágenes se insertan con wikilinks de Obsidian, por ejemplo `![[imagen.png|500]]`.
+- Se pueden usar tablas HTML con `font-size` reducido cuando una comparación necesite varias columnas.
+- Para diagramas Mermaid grandes, usa un contenedor con ancho y escala, y revisa que no quede recortado al exportar.
 
-En el HTML generado se conserva la estructura esperada por Advanced Slides:
+Ejemplo de contenedor para un diagrama ancho:
 
-- Reveal.js usa un lienzo de 960 por 700 píxeles.
-- El tema cargado es `dist/theme/black.css`, con `plugin/highlight/monokai.css` para código.
-- La transición actual es `slide`, con controles, progreso e historial activados.
-- Se cargan Markdown, resaltado de sintaxis, zoom, notas, MathJax 3, Mermaid, Chart, Custom Controls y Reveal Pointer.
-- Las rutas a CSS, JavaScript e imágenes son relativas a la carpeta de cada presentación. Si se mueve un archivo, hay que actualizar el markdown fuente o la ruta generada.
+~~~~html
+<div style="width: 100%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+```mermaid
+flowchart LR
+    A[Origen] --> B[Destino]
+```
+
+</div>
+~~~~
 
 ## Flujo de trabajo
 
-1. Editar primero el markdown fuente en Obsidian.
-2. Exportar o actualizar la presentación con Advanced Slides.
-3. Confirmar que el `index.html` correspondiente y las imágenes locales se actualizaron.
-4. Abrir la presentación en un navegador y revisar especialmente imágenes, diagramas Mermaid, bloques de código, diapositivas con HTML inline y posibles desbordamientos.
-5. Ejecutar `git diff --check` antes de entregar cambios.
+1. Edita primero el markdown en Obsidian.
+2. Conserva el estilo corto, concreto e ilustrativo de las clases existentes.
+3. Exporta con Advanced Slides a la carpeta de la presentación correspondiente.
+4. Copia o conserva las imágenes que el HTML referencia de forma local.
+5. Abre el `index.html` generado y revisa visualmente imágenes, Mermaid, bloques de código, tablas y contenido con estilos inline.
+6. Comprueba que las rutas relativas a CSS, JavaScript e imágenes sigan funcionando.
+7. Ejecuta `git diff --check` antes de entregar cambios en este repositorio.
 
-No hay un script de build o de pruebas del curso en la raíz. La validación principal es la exportación desde Obsidian y una revisión visual de los cuatro HTML.
+No hay un script de build o pruebas propio en la raíz. La validación principal es la exportación desde Obsidian y una revisión visual de cada HTML.
 
 ## Texto y documentación
 
-El material está escrito principalmente en español. Conserva en inglés los nombres de APIs, etiquetas HTML, comandos, tipos y mensajes de error que aparecen en el código.
-
-Al escribir o revisar prosa para este proyecto, aplica la skill `unslop` instalada desde `cursor/plugins` en la ruta `pstack/skills/unslop`. Mantén el significado y el tono docente, usa palabras concretas, evita frases promocionales y relleno, y prefiere oraciones cortas con voz activa. No cambies nombres de archivos, URLs, comandos ni bloques de código al limpiar la redacción.
-
+Aplica la skill `unslop` al escribir o revisar prosa para este proyecto. Conserva el significado y el tono docente. Usa palabras concretas, voz activa y frases breves. No cambies nombres de archivos, URLs, comandos ni bloques de código al limpiar la redacción.

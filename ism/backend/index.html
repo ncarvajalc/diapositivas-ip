@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Backend y arquitectura por capas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- ¿Qué hemos hecho hasta ahora?
+- ¿Qué hace el backend?
+- ¿Cómo se comunican frontend y backend?
+- Arquitectura por capas y sus elementos
+- Frameworks de backend
+- Spring Boot
+- Práctica
+- ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué hemos hecho hasta ahora?
+
+- Organizamos el frontend con Angular
+- Consumimos datos externos con una petición de lectura
+
+Pero...
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### El frontend necesita un lugar donde delegar trabajo
+
+- El navegador muestra la interfaz y responde a las acciones del usuario
+- El frontend no debería guardar toda la información del sistema
+- Las reglas importantes no deben depender de una pantalla específica
+- Los datos deben seguir disponibles aunque el usuario cierre el navegador
+
+Ese trabajo vive en el backend
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué es un backend?
+
+- Es la parte de la aplicación que se ejecuta en un servidor
+- Recibe solicitudes y devuelve respuestas
+- Valida datos y aplica reglas de negocio
+- Lee y guarda información
+- Se comunica con bases de datos y otros servicios
+
+Es el motor de la lógica de la aplicación
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### El backend protege las restricciones del sistema
+
+Supongamos que una persona quiere adoptar un gato:
+
+- La interfaz puede mostrar un formulario
+- El backend verifica que el gato esté disponible
+- El backend evita que dos personas lo adopten al mismo tiempo
+- El backend guarda la adopción
+- El frontend muestra el resultado
+
+La validación en el navegador ayuda a la experiencia, pero la regla **debe** cumplirse en el backend
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Una petición recorre todo el sistema
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    U[Usuario] --> F[Frontend]
+    F --> B[Backend]
+    B --> D[(Base de datos)]
+
+</div>
+
+
+</div>
+
+En los siguientes diagramas veremos qué ocurre dentro de cada parte.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### La arquitectura por capas separa responsabilidades
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.1); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    A[Cliente]
+
+    subgraph Backend ["Backend"]
+        B["Controlador / API"] --> C["Servicio / aplicación"]
+        C --> D["Repositorio / persistencia"]
+    end
+
+    E[(Base de datos)]
+    A --> B
+    D --> E
+
+</div>
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Cada capa tiene una responsabilidad
+
+<div style="font-size: 0.78em;">
+
+| Capa          | Responsabilidad                           |
+| ------------- | ----------------------------------------- |
+| Controlador   | Recibir solicitudes y construir la respuesta     |
+| Servicio      | Coordinar funcionalidades y aplicar reglas |
+| Repositorio   | Consultar y guardar datos                 |
+| Base de datos | Persistir información                     |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El controlador
+
+- Recibe la ruta, los parámetros y el cuerpo de la petición
+- Valida la forma básica de los datos
+- Llama al servicio correspondiente
+- Decide el estado HTTP de la respuesta (luego veremos a detalle HTTP)
+- No contiene la lógica del negocio
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El servicio
+
+- Aplica las reglas de negocio
+- Decide el orden de las operaciones
+- Puede usar uno o varios repositorios
+- Devuelve un resultado que el controlador pueda responder
+
+Ejemplo: antes de registrar una adopción, verifica disponibilidad y actualiza el estado del gato.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El repositorio o persistencia
+
+- Consulta la base de datos
+- Guarda, actualiza o elimina registros
+- Oculta los detalles de SQL o del ORM
+- No decide si una operación tiene sentido para el negocio
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El recorrido de "adoptar un gato"
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="width: 100%; margin-left: -10%; transform: scale(1.03); transform-origin: center;">
+
+
+<div class="mermaid">
+sequenceDiagram
+    participant A as Angular
+    participant C as Controlador
+    participant S as Servicio
+    participant R as Repositorio
+    participant DB as Base de datos
+
+    A->>C: POST /api/adopciones
+    C->>S: registrarAdopcion(datos)
+    S->>R: buscarGato(id)
+    R->>DB: SELECT gato
+    DB-->>R: gato disponible
+    S->>R: guardarAdopcion(datos)
+    R->>DB: INSERT adopción
+    DB-->>R: adopción creada
+    S-->>C: resultado
+    C-->>A: 201 Created
+
+</div>
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## La información debe transitar de una manera dependiendo de la capa
+
+- Tenemos JSON, objetos de Java, columnas en una base de datos
+- Hay que transformar esto
+- Para ello existen varias representaciones
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.78em;">
+
+| Representación | Vive principalmente en | Para qué sirve |
+| --- | --- | --- |
+| Modelo de frontend | Angular | Describe lo que la interfaz necesita mostrar |
+| DTO | La frontera de la API | Define los datos que entran o salen |
+| Entidad | Backend y base de datos | Representa lo que el sistema persiste |
+
+</div>
+
+Pueden tener campos parecidos, pero cada uno responde a una necesidad distinta.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El modelo
+
+```ts
+export interface Gato {
+  id: number;
+  ...
+}
+```
+
+Este modelo permite que Angular sepa qué datos puede mostrar en una tarjeta
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### El DTO
+
+DTO significa **Data Transfer Object**. Describe los datos que cruzan la frontera entre cliente y servidor.
+
+```json
+POST /api/gatos
+
+{
+  "nombre": "Milo",
+  "edadMeses": 8
+}
+```
+
+- El DTO de entrada contiene lo necesario para crear un gato
+- No incluye un `id` que todavía no existe
+- El backend valida que los datos tengan la forma esperada
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### La respuesta puede usar otro DTO
+
+```json
+{
+  "id": 15,
+  "nombre": "Milo",
+  "edadMeses": 8,
+  "estado": "disponible"
+}
+```
+
+- El servidor agrega el `id` y el estado inicial
+- El DTO de salida contiene lo que Angular puede consumir
+- Una operación de listado puede devolver menos datos que una consulta de detalle
+
+Entrada y salida no tienen por qué compartir la misma estructura.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### La entidad
+
+- Tiene una identidad dentro del sistema
+- Contiene los datos que deben guardarse
+- Puede tener relaciones con otras entidades
+- Se conecta con una tabla mediante el ORM
+- Describe la persistencia
+
+```java
+@Entity
+public class Gato {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String nombre;
+    private Integer edadMeses;
+    private String estado;
+}
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### ¿Por qué no devolver la entidad directamente?
+
+- La entidad puede tener campos internos que el cliente no necesita
+- La API puede necesitar nombres o formatos distintos
+- La entidad puede incluir relaciones que no queremos cargar o exponer
+
+El DTO expone el contrato de la API. La entidad queda dentro del backend.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Los objetos cambian en cada capa
+
+<div style="width: 100%; margin-left: -10%; transform: scale(1.02); transform-origin: center;">
+
+
+<div class="mermaid">
+sequenceDiagram
+    participant A as Angular
+    participant C as Controlador
+    participant S as Servicio
+    participant R as Repositorio
+    participant DB as Base de datos
+
+    A->>C: POST /api/gatos + CrearGatoDto
+    C->>S: CrearGatoDto
+    S->>R: EntidadGato
+    R->>DB: Guardar EntidadGato
+    DB-->>R: EntidadGato con id
+    R-->>S: EntidadGato
+    S-->>C: GatoRespuestaDto
+    C-->>A: 201 + GatoRespuestaDto
+
+</div>
+
+
+</div>
+
+En Angular, el `GatoRespuestaDto` se transforma en `ModeloGato` para que la vista pueda usarlo.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué es un framework de backend?
+
+- Es una base de trabajo para construir aplicaciones del lado del servidor
+- Propone convenciones para organizar el código
+- Incluye herramientas para rutas, configuración y manejo de solicitudes
+- Se encarga de tareas repetitivas para que nos concentremos en el dominio de negocio
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Hay varios caminos para construir un backend
+
+<div style="font-size: 0.72em;">
+
+| Framework | Lenguaje | Una razón para elegirlo |
+| --- | --- | --- |
+| Spring Boot | Java | Ecosistema amplio y estructura explícita |
+| NestJS / Hono / Fastify | JavaScript o TypeScript | Continuidad con el stack del frontend |
+</div>
+
+La decisión depende del equipo, el dominio, las restricciones del proyecto y las herramientas disponibles.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### En este curso usaremos Spring Boot
+
+Spring Boot permite crear una aplicación web en Java con:
+
+- Servidor de desarrollo incluido
+- Configuración inicial con convenciones
+- Inyección de dependencias
+- Soporte para crear APIs REST
+- Integración con bases de datos y otras herramientas
+
+No elimina la arquitectura por capas. Nos da piezas para implementarla.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Spring Boot organiza la aplicación alrededor de componentes
+
+- `@RestController`: controlador que expone rutas HTTP
+- `@Service`: servicio que contiene lógica de negocio y reglas
+- `@Repository`: repositorio que accede a los datos
+- `@Entity`: representa una entidad persistente
+- Constructor: recibe las dependencias necesarias
+
+Las anotaciones describen el rol de cada clase. Spring crea y conecta los objetos al iniciar la aplicación.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Un endpoint mínimo en Spring Bootx
+
+```java
+@RestController
+@RequestMapping("/api/gatos")
+public class GatoController {
+
+    private final GatoService servicio;
+
+    public GatoController(GatService servicio) {
+        this.servicio = servicio;
+    }
+
+    @GetMapping
+    public List<GatoResponse> listar() {
+        return servicio.listar();
+    }
+}
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### La inyección de dependencias evita construir todo a mano
+
+```java
+public class GatoController {
+    private final GatoService servicio;
+
+    public GatoController(GatoService servicio) {
+        this.servicio = servicio;
+    }
+}
+```
+
+- El controlador declara lo que necesita
+- Spring entrega una instancia de `GatoServicio`
+- Las clases quedan más fáciles de reemplazar y probar
+
+La dependencia entra por el constructor. No la buscamos desde el controlador.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Una estructura posible para el proyecto
+
+```text
+src/main/java/...
+├── controlador/
+├── servicio/
+├── repositorio/
+├── model/
+└── dto/
+```
+
+La estructura ayuda a encontrar el código
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### La configuración debe vivir fuera del código
+
+```properties
+spring.datasource.url=${DATABASE_URL}
+spring.datasource.username=${DATABASE_USER}
+spring.datasource.password=${DATABASE_PASSWORD}
+```
+- Similar a los environments de Angular
+- Cambiar de ambiente no debería exigir editar clases
+- Las credenciales no deben subirse al repositorio
+- Los nombres de variables deben quedar documentados
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Demo en VSCode de creación de proyecto en Spring Boot
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
