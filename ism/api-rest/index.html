@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# API REST
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- ¿Qué es un API?
+- ¿Qué es un API REST?
+- HTTP
+- URIs
+- Verbos HTTP
+- Cómo usar un API REST
+- Postman como herramienta para hacer pruebas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué es un API?
+
+API significa **Application Programming Interface**
+
+- Es un contrato para que dos programas se comuniquen
+- Expone operaciones sin mostrar cómo están implementadas
+- Define qué se puede pedir, qué datos se envían y qué se recibe
+- Permite que el cliente cambie sin romper el servidor (y al revés)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Un API no siempre es una página web
+
+- El navegador consume el API desde Angular
+- Una app móvil puede consumir el mismo API
+- Otro backend puede consumirlo también
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué es un API REST?
+
+REST significa **REpresentational State Transfer**
+
+- No es un protocolo ni una librería: es un **estilo arquitectónico**
+- Un conjunto de restricciones sobre cómo diseñar la comunicación
+- Se apoya en lo que ya existe en la web: **HTTP**, URLs y formatos como JSON
+
+Un API que sigue ese estilo se llama **RESTful**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### ¿Bajo qué se soporta REST?
+
+<div style="font-size: 0.8em;">
+
+| Pieza | Rol en el API |
+| --- | --- |
+| HTTP | Protocolo de transporte de las peticiones |
+| URL | Identifica el recurso (`/api/gatos/15`) |
+| Verbo HTTP | Indica la operación sobre ese recurso |
+| Código de estado | Comunica el resultado de la operación |
+| JSON | Formato de la representación de los datos |
+
+</div>
+
+REST usa los estándares de HTTP
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Las restricciones principales de REST
+
+- **Cliente-servidor**: responsabilidades separadas
+- **Sin estado**: cada petición viaja con todo lo necesario. El servidor no recuerda la petición anterior
+- **Interfaz uniforme**: mismas reglas para todos los recursos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## HTTP
+
+**HyperText Transfer Protocol**: el protocolo sobre el que viaja todo
+
+- El cliente envía una **petición** (request)
+- El servidor devuelve una **respuesta** (response)
+- La comunicación siempre la inicia el cliente
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Partes de una petición
+
+```http
+POST /api/gatos HTTP/1.1
+Host: api.ejemplo.com
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "nombre": "Milo",
+  "edadMeses": 8
+}
+```
+
+- **Verbo**: la operación
+- **URL**: el recurso
+- **Headers**: metadatos de la petición
+- **Body**: los datos que enviamos (no todos los verbos lo usan)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Partes de una respuesta
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "id": 15,
+  "nombre": "Milo",
+  "edadMeses": 8,
+  "estado": "disponible"
+}
+```
+
+- **Código de estado**: qué pasó
+- **Headers**: metadatos de la respuesta
+- **Body**: la representación del recurso
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Los códigos de estado tienen familias
+
+<div style="font-size: 0.78em;">
+
+| Familia | Significado | Ejemplos |
+| --- | --- | --- |
+| 2xx | Todo salió bien | 200 OK, 201 Created, 204 No Content |
+| 3xx | Redirección | 301, 304 |
+| 4xx | Error del cliente | 400, 401, 403, 404 |
+| 5xx | Error del servidor | 500, 503 |
+
+</div>
+
+El código es parte de la respuesta: no basta con devolver un mensaje en el JSON
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## URIs
+
+URI significa **Uniform Resource Identifier**
+
+- Es la cadena que **identifica un recurso** de forma única
+- En un API REST, cada recurso tiene su propia URI
+- Una URL es una URI que además dice **cómo llegar** al recurso
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Anatomía de una URI
+
+```text
+https://api.ejemplo.com:443/api/gatos/15?estado=disp#detalle
+```
+
+<div style="font-size: 0.78em;">
+
+| Parte | Ejemplo | Para qué sirve |
+| --- | --- | --- |
+| Esquema | `https` | Protocolo que se usa |
+| Host | `api.ejemplo.com` | Servidor que atiende la petición |
+| Puerto | `443` | Puerto del servidor (suele omitirse si es 80 o 443) |
+| Ruta | `/api/gatos/15` | Identifica el recurso |
+| Query | `?estado=disp` | Filtros y parámetros opcionales |
+| Fragmento | `#detalle` | Parte del documento; no viaja al servidor |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### La ruta describe una jerarquía
+
+```text
+/api/gatos                  → la colección de gatos
+/api/gatos/15               → el gato con id 15
+/api/gatos/15/adopciones    → las adopciones de ese gato
+```
+
+- Cada segmento acota el recurso anterior
+- Los identificadores viajan en la ruta
+- Lo que es opcional o variable viaja en el query
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Verbos HTTP
+
+El verbo dice **qué queremos hacer** con el recurso
+
+<div style="font-size: 0.8em;">
+
+| Verbo | Para qué se usa | Tiene body |
+| --- | --- | --- |
+| GET | Consultar uno o varios recursos | No |
+| POST | Crear un recurso nuevo | Sí |
+| PUT | Actualizar un recurso existente | Sí |
+| DELETE | Eliminar un recurso | No |
+
+</div>
+
+La URL identifica **qué** y el verbo indica **qué le hacemos**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### GET
+
+- Consulta información y **no modifica nada**
+- Puede devolver una lista o un solo recurso
+- Los filtros viajan en la URL como parámetros
+- Es la única operación que el navegador hace por defecto al abrir una URL
+
+```http
+GET /api/gatos
+GET /api/gatos/15
+GET /api/gatos?estado=disponible
+```
+
+Respuesta típica: `200 OK` o `404 Not Found`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### POST
+
+- Crea un recurso nuevo dentro de una colección
+- Envía los datos en el **body**, normalmente como JSON
+- El servidor asigna el `id` y devuelve el recurso creado
+- Llamarlo dos veces crea **dos** recursos
+
+```http
+POST /api/gatos
+
+{ "nombre": "Milo", "edadMeses": 8 }
+```
+
+Respuesta típica: `201 Created` o `400 Bad Request`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### PUT
+
+- Actualiza un recurso que **ya existe**
+- La URL apunta al recurso concreto, con su `id`
+- El body lleva el estado completo del recurso
+- Llamarlo varias veces con los mismos datos deja el mismo resultado (idempotencia)
+
+```http
+PUT /api/gatos/15
+
+{ "nombre": "Milo", "edadMeses": 9, "estado": "adoptado" }
+```
+
+Respuesta típica: `200 OK` o `404 Not Found`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### DELETE
+
+- Elimina el recurso identificado en la URL
+- No necesita body
+- El resultado final es el mismo aunque se repita: el recurso ya no está
+
+```http
+DELETE /api/gatos/15
+```
+
+Respuesta típica: `204 No Content` o `404 Not Found`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### El mismo recurso, distintas operaciones
+
+<div style="font-size: 0.78em;">
+
+| Petición | Significado |
+| --- | --- |
+| `GET /api/gatos` | Lista todos los gatos |
+| `POST /api/gatos` | Crea un gato nuevo |
+| `GET /api/gatos/15` | Consulta el gato 15 |
+| `PUT /api/gatos/15` | Actualiza el gato 15 |
+| `DELETE /api/gatos/15` | Elimina el gato 15 |
+
+</div>
+
+La acción no va en la URL: `/api/crearGato` **no** es REST
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Cómo usar un API REST
+
+1. Identificar el recurso y su URL base
+2. Elegir el verbo según la operación
+3. Enviar los headers necesarios (formato, autenticación)
+4. Enviar el body cuando el verbo lo requiere
+5. Leer el código de estado antes que el contenido
+6. Transformar la respuesta a lo que la interfaz necesita
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Los recursos se nombran con sustantivos
+
+<div style="font-size: 0.8em;">
+
+| Buena práctica | Ejemplo |
+| --- | --- |
+| Sustantivos, no verbos | `/api/gatos` |
+| Plural para colecciones | `/api/adopciones` |
+| Identificador en la ruta | `/api/gatos/15` |
+| Relaciones anidadas | `/api/gatos/15/adopciones` |
+| Filtros como parámetros | `/api/gatos?estado=disponible` |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### Una petición desde la terminal
+
+```bash
+curl -X POST https://api.ejemplo.com/api/gatos \
+  -H "Content-Type: application/json" \
+  -d '{"nombre": "Milo", "edadMeses": 8}'
+```
+
+Sirve para probar, pero se vuelve incómodo cuando hay muchos endpoints, tokens y cuerpos largos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### El recorrido completo de una petición
+
+<div style="width: 90%; margin-left: -10%; transform: scale(1.05); transform-origin: center;">
+
+
+<div class="mermaid">
+sequenceDiagram
+    participant C as Cliente
+    participant A as API REST
+    participant S as Servicio
+    participant DB as Base de datos
+
+    C->>A: POST /api/gatos + JSON
+    A->>S: CrearGatoDto
+    S->>DB: INSERT gato
+    DB-->>S: gato con id
+    S-->>A: GatoRespuestaDto
+    A-->>C: 201 Created + JSON
+
+</div>
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Postman
+
+Es una herramienta para **probar APIs sin escribir código de cliente**
+
+- Permite armar peticiones con verbo, URL, headers y body
+- Muestra la respuesta, el código de estado y el tiempo que tardó
+- Guarda las peticiones en **colecciones** reutilizables
+- Maneja **variables de entorno** (URL base, tokens)
+- Permite documentar y compartir el API con el equipo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+#### ¿Por qué usarla en el proyecto?
+
+- Se puede probar el backend **antes** de que exista la pantalla en Angular
+- Si algo falla, ayuda a saber si el problema está en el frontend o en el backend
+- Cada integrante del equipo puede correr las mismas peticiones
+- Sirve como evidencia de que los endpoints funcionan
+
+Primero verificamos el API, luego conectamos la interfaz
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Demo en Postman
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
