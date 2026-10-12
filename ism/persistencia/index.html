@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Persistencia
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- ¿Qué problema resuelve la persistencia?
+- JPA, entidades y tablas
+- Asociaciones entre entidades
+- Repositories y datos iniciales
+- Demo
+- Trabajo práctico: Release 6
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Dónde estamos?
+
+Hasta ahora el backend guarda los datos en memoria.
+
+- El `InMemoryRepository` carga datos desde `datos.json`
+- Los `GET` y el `POST` ya hablan con el frontend
+- Cuando reiniciamos la aplicación, ese estado vuelve a su punto de partida
+
+Ahora vamos a reemplazar ese mock por tablas reales.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## El problema con los gatos en memoria
+
+Un refugio registra a Milo J y luego crea una adopción.
+
+- La aplicación puede consultar a Milo J durante esa ejecución
+- Si se detiene el backend, la adopción deja de existir en memoria
+- Dos partes del sistema no comparten una fuente confiable de datos
+
+Necesitamos guardar el estado fuera de los objetos que viven en la aplicación.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Persistencia
+
+Ya la conocen de Fundamentos de bases de datos.
+
+En nuestro proyecto:
+
+- Java trabaja con objetos como `GatoEntity`
+- La base de datos trabaja con filas y columnas
+- Java Persistence API (JPA) conecta esas dos representaciones
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El caso de ejemplo
+
+Un refugio administra gatos y registra adopciones.
+
+
+<div class="mermaid">
+classDiagram
+    class Refugio {
+        nombre
+        capacidad
+    }
+    class Gato {
+        nombre
+        edad
+        microchip
+    }
+    class Adopcion {
+        fecha
+        nombreAdoptante
+    }
+    Refugio "1" --> "0..*" Gato : 
+    Refugio "1" --> "0..*" Adopcion : registra
+    Gato "1" --> "0..*" Adopcion : tiene
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Objetos y tablas no se conectan igual
+
+En Java navegamos una relación con referencias.
+
+```java
+gato.getRefugio().getNombre();
+```
+
+En una base de datos, la relación vive en una llave foránea.
+
+```text
+GATO_ENTITY.REFUGIO_ID = REFUGIO_ENTITY.ID
+```
+
+JPA traduce entre las referencias de Java y las llaves de la base de datos. A esto se le llama _impedance mismatch_
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## JPA y Hibernate
+
+- JPA define el estándar de persistencia para Java
+- Hibernate es la implementación que usa Spring Boot. Es quien traduce las entidades de Java y sus relaciones a tablas
+- Las anotaciones indican cómo mapear clases, atributos y relaciones
+
+JPA evita que escribamos SQL a mano, pero hay que entender las tablas que genera.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Del código Java a las tablas
+
+<div style="font-size: 0.75em;">
+
+| Clase Java | Tabla generada | Columnas principales |
+| --- | --- | --- |
+| `GatoEntity` | `GATO_ENTITY` | `ID`, `NOMBRE`, `EDAD`, `MICROCHIP`, `REFUGIO_ID` |
+| `RefugioEntity` | `REFUGIO_ENTITY` | `ID`, `NOMBRE`, `CAPACIDAD` |
+
+</div>
+
+`REFUGIO_ID` en `GATO_ENTITY` es la llave foránea que referencia `REFUGIO_ENTITY.ID`.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## `BaseEntity`
+
+Todas las entidades necesitan un identificador. En lugar de repetir ese campo en cada clase, el proyecto lo declara una sola vez en `BaseEntity`.
+
+```java
+@MappedSuperclass
+@Getter
+@Setter
+public abstract class BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+}
+```
+
+- `@Id` marca la llave primaria
+- `@GeneratedValue` deja que la base de datos asigne el identificador
+- `@MappedSuperclass` no crea una tabla propia
+- Las entidades que la extienden reciben la columna `ID`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Una entidad JPA
+
+<div style="font-size: 0.75em;">
+
+```java
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+public class GatoEntity extends BaseEntity {
+
+    @Column(nullable = false)
+    private String nombre;
+
+    private Integer edad;
+
+    @Column(unique = true)
+    private String microchip;
+}
+```
+
+- `@Entity` indica que JPA debe mapear la clase a una tabla
+- Cada atributo simple se convierte en una columna
+- JPA necesita un constructor vacío
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Convenciones que ayudan
+
+- `GatoDTO` pasa a `GatoEntity`
+- Una entidad extiende `BaseEntity`
+- JPA genera el nombre de tabla. Se puede cambiar con la anotación `@Table`
+- JPA genera el nombre de columna. Se puede cambiar con la anotación  `@Column`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## H2 para el proyecto
+
+H2 es una base de datos relacional escrita en Java. Spring Boot puede ejecutarla junto con la aplicación.
+
+```properties
+spring.datasource.url=jdbc:h2:mem:gatitos
+spring.jpa.hibernate.ddl-auto=update
+spring.h2.console.enabled=true
+```
+
+- `jdbc:h2:mem:` crea una base temporal en memoria
+- Si se quiere usar un archivo se puede usar `jdbc:h2:file:`
+- Existe una consola que queda disponible en  el path `/h2-console` cuando está habilitada
+- En Spring Boot 4, la consola también necesita la dependencia `spring-boot-h2console`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## La relación gato-refugio
+
+Un refugio puede albergar muchos gatos. Cada gato pertenece a un refugio.
+
+
+<div class="mermaid">
+erDiagram
+    REFUGIO_ENTITY ||--o{ GATO_ENTITY : alberga
+    REFUGIO_ENTITY {
+        bigint id PK
+        varchar nombre
+        integer capacidad
+    }
+    GATO_ENTITY {
+        bigint id PK
+        varchar nombre
+        varchar microchip
+        bigint refugio_id FK
+    }
+
+</div>
+
+
+La llave foránea está en la tabla del lado "muchos".
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## El lado propietario
+
+El lado propietario guarda la llave foránea. En la relación gato-refugio, ese lado es `GatoEntity`. La relación aparece como otro atributo de la clase.
+
+```java
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+public class GatoEntity extends BaseEntity {
+
+    @Column(nullable = false)
+    private String nombre;
+
+    private Integer edad;
+
+    @Column(unique = true)
+    private String microchip;
+
+    @ManyToOne
+    @JoinColumn(name = "refugio_id")
+    private RefugioEntity refugio;
+}
+```
+
+`@JoinColumn` nombra la columna que JPA crea o usa en `GATO_ENTITY`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## El lado inverso
+
+`RefugioEntity` puede conocer sus gatos, aunque no guarda una segunda llave foránea. La lista también es un atributo de la entidad.
+
+```java
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+public class RefugioEntity extends BaseEntity {
+
+    @Column(nullable = false)
+    private String nombre;
+
+    private Integer capacidad;
+
+    @OneToMany(mappedBy = "refugio", cascade = CascadeType.ALL)
+    private List<GatoEntity> gatos = new ArrayList<>();
+}
+```
+
+`mappedBy = "refugio"` apunta al atributo dueño de la relación en `GatoEntity`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Actualizar los dos lados en Java
+
+En una relación bidireccional, el código debe mantener ambas referencias consistentes.
+
+```java
+public void agregarGato(GatoEntity gato) {
+    gatos.add(gato);
+    gato.setRefugio(this);
+}
+```
+
+Si solo agregamos el gato a `refugio.getGatos()`, JPA no recibe el cambio del lado propietario.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Cardinalidad y tablas
+
+<div style="font-size: 0.8em;">
+
+| En el dominio | En JPA | En la base de datos |
+| --- | --- | --- |
+| Un refugio y muchos gatos | `@OneToMany` y `@ManyToOne` | Llave foránea en `GATO_ENTITY` |
+| Una mascota y una ficha única | `@OneToOne` | Una llave foránea con restricción única |
+| Gatos y campañas de adopción | `@ManyToMany` | Tabla intermedia con dos llaves foráneas |
+
+La cardinalidad viene del modelo del dominio.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Relaciones unidireccionales y bidireccionales
+
+- Una relación unidireccional permite navegar en un solo sentido
+- Una relación bidireccional permite navegar desde las dos entidades
+- El lado inverso usa `mappedBy`
+
+Declaren solo los recorridos que el código necesita. Una relación extra hace más difícil mantener las entidades y puede crear ciclos al serializarlas.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Cuándo cargar una relación?
+
+```java
+@OneToMany(mappedBy = "refugio", fetch = FetchType.LAZY)
+private List<GatoEntity> gatos = new ArrayList<>();
+```
+
+- `LAZY` carga la colección cuando el código la necesita
+- `EAGER` carga la relación junto con la entidad principal
+
+No carguen colecciones grandes sin una razón concreta.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Valores simples que se repiten
+
+Si un gato tiene varios rasgos, pero cada rasgo no necesita identidad propia, usamos `@ElementCollection`. `rasgos` es otro atributo de `GatoEntity`.
+
+
+
+```java
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+public class GatoEntity extends BaseEntity {
+
+    @Column(nullable = false)
+    private String nombre;
+
+    private Integer edad;
+
+    @Column(unique = true)
+    private String microchip;
+
+    @ManyToOne
+    @JoinColumn(name = "refugio_id")
+    private RefugioEntity refugio;
+
+    @ElementCollection
+    @CollectionTable(
+        name = "gato_rasgos",
+        joinColumns = @JoinColumn(name = "gato_id")
+    )
+    @Column(name = "rasgo")
+    private Set<String> rasgos = new HashSet<>();
+}
+```
+
+
+
+JPA crea una tabla para los rasgos. No necesitamos una entidad `RasgoEntity`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## `@ElementCollection` o entidad
+
+<div style="font-size: 0.8em;">
+
+| Si el dato es... | Usamos |
+| --- | --- |
+| Un valor simple que solo pertenece al gato | `@ElementCollection` |
+| Algo con identificador, atributos o consultas propias | Una entidad y una asociación |
+
+</div>
+
+`"juguetón"` puede ser un rasgo. Una adopción necesita identidad, fecha y relaciones, así que es una entidad.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## La relación gato-adopción
+
+
+<div class="mermaid">
+erDiagram
+    GATO_ENTITY ||--o{ ADOPCION_ENTITY : registra
+    REFUGIO_ENTITY ||--o{ ADOPCION_ENTITY : procesa
+    ADOPCION_ENTITY {
+        bigint id PK
+        date fecha
+        varchar nombre_adoptante
+        bigint gato_id FK
+        bigint refugio_id FK
+    }
+
+</div>
+
+
+Una adopción referencia al gato y al refugio con dos relaciones `@ManyToOne`.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Repositories con JPA
+
+```java
+public interface GatoRepository
+        extends JpaRepository<GatoEntity, Long> {
+}
+```
+
+`JpaRepository` ya incluye operaciones como:
+
+- `save(entidad)`
+- `findById(id)`
+- `findAll()`
+- `deleteById(id)`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Vamos a cambiar la implementación
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.5em;">
+
+
+<div class="mermaid">
+flowchart LR
+    
+    subgraph Ahora
+        C2[Controlador] --> R2["GatoRepository"]
+        R2 --> J["JpaRepository"] --> D[(H2)]
+    end
+    subgraph Antes
+        C1[Controlador] --> R1["GatoRepository"]
+        R1 --> I["InMemoryGatoRepository"]
+    end
+
+</div>
+
+
+La interfaz del repository expresa lo que necesita el resto del backend. JPA provee la implementación.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Cómo llenamos con datos iniciales nuestra base de datos? (Veremos un demo más adelante)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Datos iniciales con `data.sql`
+
+```sql
+INSERT INTO REFUGIO_ENTITY (id, nombre, capacidad)
+VALUES (1, 'Huellitas', 30);
+
+INSERT INTO GATO_ENTITY (id, nombre, edad, microchip, refugio_id)
+VALUES (1, 'Milo J', 3, '2026-0001', 1);
+```
+
+- Los datos que no dependen de otra tabla van primero
+- Luego insertamos las filas con llaves foráneas
+- Los identificadores deben coincidir con las relaciones
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Cómo ejecuta Spring Boot `data.sql`?
+
+<div style="font-size: 0.72em;">
+
+```text
+src/main/resources/
+├── application.properties
+└── data.sql
+```
+
+```properties
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.defer-datasource-initialization=true
+spring.h2.console.enabled=true
+```
+
+1. Hibernate lee las clases con `@Entity` y crea o actualiza las tablas.
+2. Spring ejecuta `data.sql` después de crear las tablas.
+3. H2 queda listo con los datos iniciales.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Demo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Ahora es su turno: Release 6
+
+Usen el tiempo restante de la clase para avanzar en [Release 6: Persistencia real](https://recursos-isis-2211.virtual.uniandes.edu.co/proyecto/segunda_parte/release6/).
+
+1. Deben hacer un UML consolidado y un diagrama Entidad Relación (ER).
+2. Cada integrante crea las entidades JPA y los repositories de las tres entidades de su módulo.
+3. Reemplacen las implementaciones `InMemory...Repository` por `JpaRepository`.
+4. Prueben sus tablas en H2 y agreguen los datos iniciales a `data.sql` respetando las llaves foráneas.
+
+Para esta entrega todavía no necesitan `Service`, nuevos controllers, Postman ni cambios en Angular. 
+
+</div>
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
