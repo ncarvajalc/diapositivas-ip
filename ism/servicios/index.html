@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Servicios e implementación completa del API
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Agenda
+
+- ¿Dónde estamos?
+- Responsabilidades del service
+- DTO, DTOCompleto y conversión en el controller
+- Reglas de negocio y excepciones
+- API completa de gatos
+- CORS
+- Demo
+- ¿Preguntas?
+- Trabajo práctico: Release 7
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Dónde estamos?
+
+Con JPA, los gatos ya viven en tablas de H2 y no en `datos.json`.
+
+- El `GatoRepository` ahora es un `JpaRepository`
+- Los `GET` y el `POST` ya funcionan contra la base de datos
+- El controller habla directamente con el repository
+
+Pero...
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué pasa si nadie valida?
+
+Un cliente envía un gato sin nombre y con edad `-3`.
+
+- El controller lo recibe
+- El repository lo guarda, porque su trabajo es persistir
+- La base de datos queda con un dato que no tiene sentido
+
+Necesitamos un lugar para las reglas de negocio
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿A qué queremos llegar?
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    C[Controlador] --> S[Servicio]
+    S --> R[Repositorio]
+    R --> DB[(Base de datos)]
+
+</div>
+
+
+</div>
+
+¡Ya vamos a crear el servicio!
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Cada capa tiene su trabajo
+
+- El controller recibe la petición y construye la respuesta HTTP
+- El service aplica las reglas de negocio
+- El repository consulta y guarda su entidad
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Responsabilidades del service
+
+`GatoService` trabaja solo con `GatoEntity`.
+
+- Recibe y retorna entidades, nunca DTO, JSON ni objetos HTTP
+- Consulta su propio `GatoRepository`
+- Valida antes de guardar, actualizar o borrar
+- Lanza una excepción si falta el recurso o una regla falla
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El service y sus dependencias
+
+La inyección por constructor deja claras sus dependencias.
+
+```java
+@Service
+public class GatoService {
+    private final GatoRepository gatoRepository;
+
+    public GatoService(GatoRepository gatoRepository) {
+        this.gatoRepository = gatoRepository;
+    }
+}
+```
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## DTO, Entity y JSON
+
+El controller es el límite entre el API y la lógica de negocio.
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    J[JSON] -->|Jackson| D[GatoDTO]
+    D -->|ModelMapper| E[GatoEntity]
+    E -->|ModelMapper| D2[GatoDTO]
+    D2 -->|Jackson| J2[JSON]
+
+</div>
+
+
+</div>
+
+- Jackson convierte entre JSON y DTO automáticamente en `@RequestBody`
+- ModelMapper convierte entre DTO y Entity dentro del controller
+- El service no conoce `GatoDTO`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## ¿Cómo usamos ModelMapper?
+
+Primero agregamos la dependencia en el `pom.xml`.
+
+```xml
+<dependency>
+    <groupId>org.modelmapper</groupId>
+    <artifactId>modelmapper</artifactId>
+    <version>3.2.4</version>
+</dependency>
+```
+
+Luego creamos `ModelMapperConfig.java`.
+
+```java
+@Configuration
+public class ModelMapperConfig {
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
+}
+```
+
+- `@Bean` deja el `ModelMapper` disponible para inyectarlo
+- Mapea los atributos que tienen el mismo nombre en el DTO y en la entidad
+- Reemplaza los métodos de conversión que escribíamos a mano en el DTO
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.72em;">
+
+## Un controller ligero
+
+```java
+@RestController
+@RequestMapping("/gatos")
+public class GatoController {
+    private final GatoService gatoService;
+    private final ModelMapper modelMapper;
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public GatoDTO crearGato(@RequestBody GatoDTO gato)
+            throws IllegalOperationException {
+        GatoEntity entidad = modelMapper.map(gato, GatoEntity.class);
+        return modelMapper.map(gatoService.create(entidad), GatoDTO.class);
+    }
+}
+```
+
+- `@RequestMapping` agrupa el recurso `/gatos`
+- `@PostMapping` declara el verbo HTTP
+- `@RequestBody` recibe un DTO convertido desde JSON
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Por qué el controller no retorna entidades?
+
+Un refugio tiene gatos y cada gato conoce a su refugio.
+
+- Si Jackson serializa un `RefugioEntity`, recorre su lista `gatos`
+- Cada gato apunta de nuevo a su refugio y el recorrido no termina
+- El JSON también expondría la estructura interna de la base de datos
+
+El controller siempre responde con un DTO
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Dos DTO por recurso
+
+<div style="font-size: 0.8em;">
+
+| DTO | Contenido | Se usa en |
+| --- | --- | --- |
+| `<Entidad>DTO` | Atributos básicos, sin colecciones | El cuerpo de `POST` y `PUT`, y su respuesta |
+| `<Entidad>DTOCompleto` | El DTO básico y las colecciones de asociaciones | La respuesta de los `GET` |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## `RefugioDTO` y `RefugioDTOCompleto`
+
+```java
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class RefugioDTO {
+    private Long id;
+    private String nombre;
+    private String direccion;
+    private String telefono;
+    private Integer capacidad;
+}
+
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class RefugioDTOCompleto extends RefugioDTO {
+    private List<GatoDTO> gatos = new ArrayList<>();
+}
+```
+
+- `RefugioDTOCompleto` hereda los atributos básicos y agrega la colección
+- La lista usa `GatoDTO`, no `GatoDTOCompleto`
+- ModelMapper llena `gatos` porque el atributo se llama igual en la entidad y en el DTO
+- `GatoEntity` no tiene colecciones de asociaciones, así que le basta `GatoDTO`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## ¿Por qué no hay ciclos en el JSON?
+
+`GET /refugios/1`
+
+```json
+{
+  "id": 1,
+  "nombre": "Huellitas",
+  "capacidad": 20,
+  "gatos": [
+    { "id": 1, "nombre": "Milo J", "edad": 3 },
+    { "id": 2, "nombre": "Luna", "edad": 2 }
+  ]
+}
+```
+
+Cada gato es un `GatoDTO`, que no incluye a su refugio. El JSON es un árbol y no vuelve a su punto de partida.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Un controller que responde `DTOCompleto`
+
+```java
+@RestController
+@RequestMapping("/refugios")
+public class RefugioController {
+
+    @GetMapping("/{id}")
+    public RefugioDTOCompleto obtenerRefugio(@PathVariable Long id)
+            throws EntityNotFoundException {
+        return modelMapper.map(refugioService.findById(id),
+                RefugioDTOCompleto.class);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public RefugioDTO crearRefugio(@RequestBody RefugioDTO refugio)
+            throws IllegalOperationException {
+        RefugioEntity entidad = modelMapper.map(refugio, RefugioEntity.class);
+        return modelMapper.map(refugioService.create(entidad), RefugioDTO.class);
+    }
+}
+```
+
+- Los `GET` responden `RefugioDTOCompleto`
+- `POST` y `PUT` reciben y responden `RefugioDTO`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.68em;">
+
+## Reglas y recursos inexistentes
+
+```java
+public GatoEntity findById(Long id) throws EntityNotFoundException {
+    return gatoRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException(
+            "No existe el gato con id " + id));
+}
+
+public GatoEntity create(GatoEntity gato)
+        throws IllegalOperationException {
+    validate(gato);
+    return gatoRepository.save(gato);
+}
+
+private void validate(GatoEntity gato) throws IllegalOperationException {
+    if (gato.getNombre() == null || gato.getNombre().isBlank()) {
+        throw new IllegalOperationException("El nombre es obligatorio");
+    }
+    if (gato.getEdad() == null || gato.getEdad() < 0 || gato.getEdad() > 25) {
+        throw new IllegalOperationException("La edad debe estar entre 0 y 25");
+    }
+}
+```
+
+- `EntityNotFoundException`: el id no existe
+- `IllegalOperationException`: la operación incumple una regla
+
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->¿Qué códigos HTTP les corresponden?
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Las excepciones las creamos nosotros
+
+Java no trae `EntityNotFoundException` ni `IllegalOperationException`. Son dos clases del proyecto, una por cada tipo de error de negocio.
+
+```java
+public class EntityNotFoundException extends Exception {
+    public EntityNotFoundException(String message) {
+        super(message);
+    }
+}
+
+public class IllegalOperationException extends Exception {
+    public IllegalOperationException(String message) {
+        super(message);
+    }
+}
+```
+
+- Cada una vive en su propio archivo, junto al resto de clases del backend
+- Extienden `Exception`, por eso los métodos que las lanzan declaran `throws`
+- El service las lanza con `throw new ...` y el mensaje viaja en el constructor
+
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Luego haremos la correspondencia con los códigos de error correspondientes
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Actualizar y borrar
+
+```java
+public GatoEntity update(Long id, GatoEntity gato)
+        throws EntityNotFoundException, IllegalOperationException {
+    GatoEntity existente = findById(id);
+    validate(gato);
+
+    existente.setNombre(gato.getNombre());
+    existente.setEdad(gato.getEdad());
+    // ... demás atributos
+
+    return gatoRepository.save(existente);
+}
+
+public void delete(Long id) throws EntityNotFoundException {
+    gatoRepository.delete(findById(id));
+}
+```
+
+`update` y `delete` reutilizan `findById`. Así el `404` es el mismo en todas las operaciones.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Una entidad, un repository
+
+Cada service inyecta únicamente el repository de su entidad.
+
+```text
+GatoController → GatoService → GatoRepository
+RefugioController → RefugioService → RefugioRepository
+```
+
+Si una operación necesita otra entidad, el service usa el otro service. No accede a su repository directamente.
+
+Esto evita que `GatoService` conozca cómo persiste `RefugioEntity`.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Cómo llegan al cliente?
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    S[Service lanza la excepción] --> C[Controller la deja pasar]
+    C --> H[RestExceptionHandler la atrapa]
+    H --> R[Respuesta HTTP código y mensaje]
+
+</div>
+
+
+</div>
+
+El controller no decide el error. Solo declara `throws` y la excepción sigue su camino hasta el manejador.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## El manejador de excepciones
+
+Es una clase más que creamos nosotros. Spring la encuentra solo por su anotación.
+
+```java
+@RestControllerAdvice
+public class RestExceptionHandler {
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleEntityNotFound(EntityNotFoundException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(IllegalOperationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleIllegalOperation(IllegalOperationException exception) {
+        return exception.getMessage();
+    }
+}
+```
+
+- `@RestControllerAdvice` atiende las excepciones de todos los controllers
+- `@ExceptionHandler` indica qué tipo de excepción atiende cada método
+- `@ResponseStatus` define el código HTTP: `EntityNotFoundException` responde `404` e `IllegalOperationException` responde `400`
+- El método retorna el mensaje que el service puso en la excepción
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## API completa para un recurso
+
+
+
+| HTTP | Ruta | Controller | Service | Éxito |
+| --- | --- | --- | --- | --- |
+| `GET` | `/gatos` | convierte entidades a DTO | `findAll()` | `200` |
+| `GET` | `/gatos/{id}` | convierte entidad a DTO | `findById(id)` | `200` |
+| `POST` | `/gatos` | convierte DTO a entidad | `create(gato)` | `201` |
+| `PUT` | `/gatos/{id}` | convierte DTO a entidad | `update(id, gato)` | `200` |
+| `DELETE` | `/gatos/{id}` | no devuelve cuerpo | `delete(id)` | `204` |
+
+
+En un recurso con colecciones, como `/refugios`, los `GET` responden `<Entidad>DTOCompleto`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## ¿Se acuerdan de CORS?
+
+Angular corre en `localhost:4200` y el backend en `localhost:8080`. El puerto hace parte del origen, así que son orígenes distintos.
+
+- El navegador, no Spring, descarta la respuesta si el backend no la autoriza con `Access-Control-Allow-Origin`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## `CorsConfig`
+
+En lugar de `@CrossOrigin` en cada controller, declaramos una sola clase.
+
+```java
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:4200",
+                                "http://172.23.66.11:4200")
+                .allowedMethods("GET", "POST", "PUT", "DELETE");
+    }
+}
+```
+
+- `addMapping("/**")` aplica la regla a todas las rutas
+- `allowedOrigins` lista dónde corre el front. Usen la IP de su máquina
+- `allowedMethods` debe incluir `PUT` y `DELETE`, o el `OPTIONS` falla con `403`
+- La clase va en el mismo paquete de `@SpringBootApplication` o en un subpaquete. Si no, Spring la ignora
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Demo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## Ahora es su turno: Release 7
+
+Usen el tiempo restante de la clase para avanzar en [Release 7: Lógica de negocio y controllers](https://recursos-isis-2211.virtual.uniandes.edu.co/proyecto/segunda_parte/release7/).
+
+1. Revisen el [taller de identificar las reglas de negocio de tu proyecto](https://recursos-isis-2211.virtual.uniandes.edu.co/talleres/taller-reglas-de-negocio/)
+2. Creen un `<Entidad>DTO` y un `<Entidad>DTOCompleto` por cada entidad.
+3. Creen un `Service` por cada entidad con `findAll`, `findById`, `create`, `update` y `delete`.
+4. Implementen al menos una regla de negocio por entidad principal.
+5. Creen las excepciones `EntityNotFoundException` (404) e `IllegalOperationException` (400) y un `RestExceptionHandler` que las convierta en respuestas HTTP.
+6. Hagan que sus controllers usen el service, expongan el CRUD completo y respondan `DTOCompleto` en los `GET`.
+7. Quiten `@CrossOrigin` de los controllers y confirmen que `CorsConfig` permite `GET`, `POST`, `PUT` y `DELETE`.
+8. Actualicen su colección de Postman con todos los endpoints y sus errores.
+
+</div>
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
