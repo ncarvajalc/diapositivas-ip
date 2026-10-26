@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Pruebas y asociaciones
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Agenda
+
+- ¿Dónde estamos?
+- Pruebas del Service con JUnit
+- Arrange, Act, Assert
+- Datos de prueba con Instancio
+- Las pruebas en el pipeline
+- Asociaciones entre módulos
+- Pruebas de API con Postman
+- El front y `DTOCompleto`
+- Demo
+- ¿Preguntas?
+- Trabajo práctico: Release 7
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Dónde estamos?
+
+- `Service` con reglas de negocio por entidad
+- `DTO` y `DTOCompleto` en los controllers
+- Excepciones, `RestExceptionHandler` y `CorsConfig`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Lo que falta para cerrar el Release 7
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    S[Service y API] --> P[Pruebas JUnit]
+    P --> A[Asociaciones]
+    A --> M[Postman]
+    M --> F[Front]
+
+</div>
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Pruebas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Dos formas de probar
+
+<div style="font-size: 0.8em;">
+
+| Herramienta | Qué prueba | Cómo lo hace |
+| --- | --- | --- |
+| JUnit sobre el Service | Las reglas de negocio | Llama al service directamente, con una base de datos H2 |
+| Postman | El contrato del API | Envía peticiones HTTP y revisa código, mensaje y JSON |
+
+</div>
+
+Se complementan. JUnit encuentra la regla que falla y Postman confirma que el API cumple el contrato.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Por qué probamos el Service?
+
+- Ahí viven las reglas de negocio
+- No necesita servidor web ni peticiones HTTP
+- Corre en segundos y se puede repetir en cada cambio
+- Si falla, el nombre de la prueba dice qué regla se rompió
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Una prueba tiene tres momentos 
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    A[Arrange] --> B[Act] --> C[Assert]
+
+</div>
+
+
+</div>
+
+- **Arrange**: preparar los datos y el estado inicial
+- **Act**: ejecutar la acción que queremos probar
+- **Assert**: verificar que el resultado es el esperado
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Arrange, Act, Assert (AAA)
+
+Es una forma de organizar **toda** prueba, en cualquier lenguaje.
+
+```java
+@Test
+void findById_gatoExistente_retornaElGato() throws EntityNotFoundException {
+    // Arrange
+    GatoEntity esperado = gatos.get(0);
+
+    // Act
+    GatoEntity resultado = gatoService.findById(esperado.getId());
+
+    // Assert
+    assertEquals(esperado.getNombre(), resultado.getNombre());
+}
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Reglas para escribir con AAA
+
+- **Arrange** deja todo listo y no ejecuta lo que estamos probando
+- **Act** es una sola llamada al método bajo prueba
+- **Assert** verifica el resultado de esa llamada y nada más
+- Separamos los tres bloques con un comentario y una línea en blanco
+- Si el Arrange crece, lo movemos a un método auxiliar
+- Una prueba verifica un solo comportamiento
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Una prueba sin estructura
+
+```java
+@Test
+void test1() throws Exception {
+    GatoEntity g = nuevoGato();
+    g.setNombre(" ");
+    assertThrows(IllegalOperationException.class, () -> gatoService.create(g));
+    GatoEntity h = nuevoGato();
+    GatoEntity r = gatoService.create(h);
+    assertNotNull(r.getId());
+    h.setEdad(40);
+    assertThrows(IllegalOperationException.class, () -> gatoService.update(r.getId(), h));
+}
+```
+
+- El nombre no dice qué comportamiento se verifica
+- Prueba tres cosas a la vez: si falla la primera, las otras no se ejecutan
+- No se distingue qué es preparación y qué es verificación
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Una prueba debe verificar solo una cosa
+
+El mismo contenido, separado y con AAA.
+
+```java
+@Test
+void create_nombreVacio_lanzaIllegalOperationException() {
+    // Arrange
+    GatoEntity nuevo = nuevoGato();
+    nuevo.setNombre(" ");
+
+    // Act y Assert
+    IllegalOperationException exception = assertThrows(
+            IllegalOperationException.class,
+            () -> gatoService.create(nuevo));
+    assertEquals("El nombre es obligatorio", exception.getMessage());
+}
+```
+
+- Cuando esperamos una excepción, `assertThrows` ejecuta y verifica a la vez
+- Por eso Act y Assert se escriben juntos
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Cómo nombrar una prueba
+
+`metodo_escenario_resultadoEsperado`
+
+- `findById_gatoExistente_retornaElGato`
+- `findById_gatoInexistente_lanzaEntityNotFoundException`
+- `create_nombreVacio_lanzaIllegalOperationException`
+
+El nombre es la documentación de la regla. Cada método se autodocumenta.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Caso feliz y caso de error
+
+Por cada método del service probamos como mínimo:
+
+- **Caso feliz**: datos válidos, la operación funciona
+- **Caso de error**: se viola una regla o falta un recurso, y se lanza la excepción esperada
+
+Si un método valida dos reglas, necesitamos el caso feliz y un caso que viole cada regla.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## Cobertura mínima de `GatoService`
+
+| Método | Caso feliz | Caso de error |
+| --- | --- | --- |
+| `findAll` | Retorna los gatos guardados | Lista vacía |
+| `findById` | Retorna el gato | Id inexistente: `EntityNotFoundException` |
+| `create` | Persiste el gato | Nombre vacío o edad fuera de rango: `IllegalOperationException` |
+| `update` | Actualiza los atributos | Id inexistente o edad fuera de rango |
+| `delete` | Elimina el gato | Id inexistente: `EntityNotFoundException` |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Preparar el proyecto
+
+Dos dependencias de prueba en el `pom.xml`.
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.instancio</groupId>
+    <artifactId>instancio-junit</artifactId>
+    <version>6.1.0</version>
+    <scope>test</scope>
+</dependency>
+```
+
+- La primera trae `@DataJpaTest` y `TestEntityManager`
+- La segunda genera objetos de prueba
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## `@DataJpaTest`
+
+Levanta solo la capa de persistencia para la prueba.
+
+- Carga las entidades, los repositories y una base H2 embebida
+- No carga controllers ni servidor web
+- Cada prueba corre en una transacción que se revierte al terminar
+- No carga los `@Service`, así que los traemos con `@Import`
+
+```java
+@DataJpaTest
+@Import(GatoService.class)
+class GatoServiceTest {
+}
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## La clase de prueba
+
+```java
+@DataJpaTest
+@Import(GatoService.class)
+class GatoServiceTest {
+
+    @Autowired
+    private GatoService gatoService;
+
+    @Autowired
+    private TestEntityManager entityManager;
+
+    private List<GatoEntity> gatos = new ArrayList<>();
+
+    @BeforeEach
+    void setUp() { ... }
+}
+```
+
+- `@Autowired` inyecta el service que probamos y el `TestEntityManager`
+- La lista `gatos` guarda los datos que cada prueba necesita
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## `@BeforeEach` y el estado inicial
+
+```java
+@BeforeEach
+void setUp() {
+    entityManager.getEntityManager().createQuery("delete from GatoEntity").executeUpdate();
+    entityManager.getEntityManager().createQuery("delete from RefugioEntity").executeUpdate();
+
+    for (int i = 0; i < 3; i++) {
+        GatoEntity gato = nuevoGato();
+        entityManager.persist(gato);
+        gatos.add(gato);
+    }
+    entityManager.flush();
+}
+```
+
+- `setUp()` se ejecuta antes de **cada** prueba. JUnit no garantiza el orden, así que ninguna prueba puede depender de otra
+- `data.sql` también corre en las pruebas: limpiamos las tablas antes de insertar los datos propios
+- Primero se borran los gatos y luego los refugios, por la llave foránea
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## `TestEntityManager`
+
+Prepara y verifica datos **sin pasar por el service** que estamos probando.
+
+- `persist`: guarda una entidad en la base
+- `find`: lee una entidad por id
+- `flush`: envía los cambios pendientes a la base
+- `clear`: vacía la memoria de JPA para que el siguiente `find` lea de la base
+
+Si el Arrange usara el service y este tuviera un error, la prueba fallaría antes de llegar al Act.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Verificar contra la base de datos
+
+```java
+@Test
+void update_datosValidos_actualizaElGato() throws Exception {
+    // Arrange
+    GatoEntity existente = gatos.get(0);
+    GatoEntity cambios = nuevoGato();
+    cambios.setNombre("Nombre actualizado");
+
+    // Act
+    gatoService.update(existente.getId(), cambios);
+
+    // Assert
+    entityManager.flush();
+    entityManager.clear();
+    GatoEntity guardado = entityManager.find(GatoEntity.class, existente.getId());
+    assertEquals("Nombre actualizado", guardado.getNombre());
+}
+```
+
+Sin `flush` y `clear`, el `find` podría devolver el mismo objeto en memoria y no lo que quedó en la base.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Datos de prueba con Instancio
+
+Escribir un gato válido en cada prueba es repetitivo. Instancio crea el objeto completo con valores aleatorios.
+
+```java
+private GatoEntity nuevoGato() {
+    return Instancio.of(GatoEntity.class)
+            .ignore(field(GatoEntity::getId))
+            .ignore(field(GatoEntity::getRefugio))
+            .generate(field(GatoEntity::getEdad), gen -> gen.ints().range(0, 25))
+            .create();
+}
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Qué fijamos y qué dejamos al azar
+
+- `ignore(id)`: el id lo asigna la base de datos
+- `ignore(refugio)`: evitamos arrastrar una relación que la prueba no necesita
+- `generate(edad)`: el azar debe respetar la regla de 0 a 25, o el caso feliz fallaría
+- El resto de atributos queda con valores aleatorios porque la regla no depende de ellos
+
+En el caso de error sí fijamos el dato que viola la regla: `nuevo.setNombre(" ")`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.72em;">
+
+## Varios valores, una misma regla
+
+`@ParameterizedTest` ejecuta la misma prueba con distintos datos.
+
+```java
+@ParameterizedTest
+@ValueSource(ints = {-1, 26})
+void create_edadFueraDeRango_lanzaIllegalOperationException(int edad) {
+    // Arrange
+    GatoEntity nuevo = nuevoGato();
+    nuevo.setEdad(edad);
+
+    // Act y Assert
+    assertThrows(IllegalOperationException.class, () -> gatoService.create(nuevo));
+}
+```
+
+Probamos los dos bordes de la regla: uno por debajo del mínimo y uno por encima del máximo.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Ejecutar y leer el resultado
+
+```bash
+./mvnw test
+```
+
+```text
+[INFO] Tests run: 15, Failures: 0, Errors: 0 -- in RefugioServiceTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0 -- in GatoServiceTest
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+- Maven ejecuta toda clase de `src/test/java` que termine en `Test`
+- Los reportes quedan en `target/surefire-reports`
+- Desde el IDE se puede correr una sola prueba o una sola clase
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## Cuando una prueba falla
+
+```text
+[ERROR] GatoServiceTest.create_edadFueraDeRango_lanzaIllegalOperationException(int)[2]
+  Expected IllegalOperationException to be thrown, but nothing was thrown.
+[INFO] Tests run: 31, Failures: 1
+[INFO] BUILD FAILURE
+```
+
+- El nombre de la prueba dice qué regla se rompió
+- El mensaje dice qué esperaba la prueba y qué pasó
+- La prueba nos protege de cambios inesperados sin que se tenga que probar todo a mano cada vez
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Las pruebas en el pipeline
+
+El repositorio del proyecto ya tiene un `Jenkinsfile`. En cada ejecución, Jenkins:
+
+- Compila el backend y ejecuta sus pruebas
+- Construye y prueba el front
+- Envía ambos a SonarQube
+- Ejecuta las colecciones de Postman con Newman
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Ahora estas pruebas aparecen en el Jenkinsfile
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    P[Código en el repositorio] --> J[Jenkins]
+    J --> T[mvn test]
+    T --> R[Reporte JUnit]
+    R --> V{En verde}
+
+</div>
+
+
+</div>
+
+- Cada clase `*Test` se ejecuta en cada build
+- `junit` publica el resultado en la página del build
+- Una sola prueba en rojo deja el build en rojo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Un PR con pruebas en rojo no se aprueba
+
+- Ejecuten `./mvnw test` antes de hacer push
+- Si una prueba falla, corrijan el código o la prueba. **No la comenten ni la borren**
+- No modifiquen el `Jenkinsfile` para que el build pase
+- El PR no se aprueba mientras el pipeline esté en rojo
+- Las pruebas son parte de lo que se entrega, igual que el controller
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Asociaciones entre módulos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Dos recursos que viven por separado
+
+- `POST /gatos` crea un gato que todavía no tiene refugio
+- `POST /refugios` crea un refugio sin gatos
+- Los dos ya tienen su CRUD completo
+
+¿Cómo conectamos un gato existente con un refugio existente?
+
+Con un endpoint de asociación.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Endpoints de asociación
+
+`POST /<entidades>/{id}/<asociados>/{asociadoId}`
+
+Un ejemplo con nuestro dominio:
+
+`POST /refugios/1/gatos/7`
+
+- El primer recurso de la ruta es el **dueño** de la asociación
+- El segundo es el recurso **asociado**
+- No lleva cuerpo: los dos ids viajan en la URL
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Los tres endpoints de la asociación
+
+| HTTP | Ruta | Éxito | Errores |
+| --- | --- | --- | --- |
+| `GET` | `/refugios/{id}/gatos` | `200` con `List<GatoDTO>` | `404` |
+| `POST` | `/refugios/{id}/gatos/{gatoId}` | `200` con `RefugioDTOCompleto` | `404` y `400` |
+| `DELETE` | `/refugios/{id}/gatos/{gatoId}` | `204` sin cuerpo | `404` y `400` |
+
+- El `POST` responde `DTOCompleto` para que el cliente vea la colección ya actualizada
+- Responde `200` y no `201`: modifica un refugio que ya existe, no crea un recurso con URL propia
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Quién es el dueño?
+
+El que empieza la ruta: `/refugios/{id}/gatos/...`
+
+- Un refugio tiene gatos, así que el refugio es el dueño
+- Sus endpoints viven en `RefugioController`
+- Su lógica vive en `RefugioService`
+
+Para decidirlo en su proyecto, pregúntense qué recurso "contiene" al otro en el enunciado.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## En el curso: el padre inyecta a los otros
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    C[RefugioController] --> S[RefugioService]
+    S --> R[RefugioRepository]
+    S --> G[GatoService]
+    G --> GR[GatoRepository]
+
+</div>
+
+
+</div>
+
+`RefugioService` usa a `GatoService` para todo lo que tenga que ver con gatos. Nunca toca `GatoRepository`.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## `RefugioService` inyecta a `GatoService`
+
+```java
+@Service
+public class RefugioService {
+    private final RefugioRepository refugioRepository;
+    private final GatoService gatoService;
+
+    public RefugioService(RefugioRepository refugioRepository,
+                          GatoService gatoService) {
+        this.refugioRepository = refugioRepository;
+        this.gatoService = gatoService;
+    }
+}
+```
+
+- Recibe su propio repository y el **service** de gatos
+- Para buscar un gato llama a `gatoService.findById`
+- No hay ningún `GatoRepository` en esta clase
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## `addGato`: el servicio de asociación
+
+```java
+@Transactional
+public RefugioEntity addGato(Long refugioId, Long gatoId)
+        throws EntityNotFoundException, IllegalOperationException {
+    RefugioEntity refugio = findById(refugioId);
+    GatoEntity gato = gatoService.findById(gatoId);
+
+    if (gato.getRefugio() != null && gato.getRefugio().getId().equals(refugioId)) {
+        throw new IllegalOperationException("El gato ya pertenece a este refugio");
+    }
+    if (gato.getRefugio() != null) {
+        throw new IllegalOperationException("El gato ya pertenece a otro refugio");
+    }
+    if (refugio.getGatos().size() >= refugio.getCapacidad()) {
+        throw new IllegalOperationException("El refugio ya alcanzó su capacidad");
+    }
+
+    gato.setRefugio(refugio);
+    refugio.getGatos().add(gato);
+    return refugioRepository.save(refugio);
+}
+```
+
+Se puede crear un método de validar reglas asociación para hacer el código más sencillo de leer.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Qué valida `addGato`
+
+| Situación | Excepción | HTTP |
+| --- | --- | --- |
+| El refugio no existe | `EntityNotFoundException` | `404` |
+| El gato no existe | `EntityNotFoundException` | `404` |
+| El gato ya está en este refugio | `IllegalOperationException` | `400` |
+| El gato está en otro refugio | `IllegalOperationException` | `400` |
+| El refugio llegó a su capacidad | `IllegalOperationException` | `400` |
+
+El `404` del gato lo lanza `GatoService.findById`. `RefugioService` no repite esa lógica.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Quitar y listar
+
+```java
+@Transactional(readOnly = true)
+public List<GatoEntity> getGatos(Long refugioId) throws EntityNotFoundException {
+    return findById(refugioId).getGatos();
+}
+
+@Transactional
+public void removeGato(Long refugioId, Long gatoId)
+        throws EntityNotFoundException, IllegalOperationException {
+    RefugioEntity refugio = findById(refugioId);
+    GatoEntity gato = gatoService.findById(gatoId);
+
+    if (gato.getRefugio() == null || !gato.getRefugio().getId().equals(refugioId)) {
+        throw new IllegalOperationException("El gato no pertenece a este refugio");
+    }
+
+    refugio.getGatos().removeIf(g -> g.getId().equals(gatoId));
+    gato.setRefugio(null);
+    refugioRepository.save(refugio);
+}
+```
+
+Desasociar no borra el gato: queda sin refugio y se puede asociar a otro.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Los endpoints en `RefugioController`
+
+```java
+@GetMapping("/{id}/gatos")
+public List<GatoDTO> listarGatosDelRefugio(@PathVariable Long id)
+        throws EntityNotFoundException {
+    return refugioService.getGatos(id).stream()
+            .map(gato -> modelMapper.map(gato, GatoDTO.class))
+            .toList();
+}
+
+@PostMapping("/{id}/gatos/{gatoId}")
+public RefugioDTOCompleto asociarGato(@PathVariable Long id, @PathVariable Long gatoId)
+        throws EntityNotFoundException, IllegalOperationException {
+    return modelMapper.map(refugioService.addGato(id, gatoId), RefugioDTOCompleto.class);
+}
+
+@DeleteMapping("/{id}/gatos/{gatoId}")
+@ResponseStatus(HttpStatus.NO_CONTENT)
+public void desasociarGato(@PathVariable Long id, @PathVariable Long gatoId)
+        throws EntityNotFoundException, IllegalOperationException {
+    refugioService.removeGato(id, gatoId);
+}
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Las dependencias van en un solo sentido
+
+- `RefugioService` conoce a `GatoService`
+- `GatoService` **no** conoce a `RefugioService`
+
+Con muchas entidades aplica la misma plantilla: el service del dueño inyecta el service del asociado, y el controller del dueño expone la ruta.
+
+`<Dueño>Service` inyecta `<Asociado>Service`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## Probar una asociación
+
+`RefugioService` inyecta a `GatoService`, así que la prueba importa **los dos**.
+
+```java
+@DataJpaTest
+@Import({RefugioService.class, GatoService.class})
+class RefugioServiceTest { ... }
+
+@Test
+void addGato_refugioLleno_lanzaIllegalOperationException() throws Exception {
+    // Arrange
+    RefugioEntity pequeno = nuevoRefugio(1);
+    entityManager.persist(pequeno);
+    GatoEntity segundoGato = nuevoGato();
+    entityManager.persist(segundoGato);
+    refugioService.addGato(pequeno.getId(), gatoLibre.getId());
+
+    // Act y Assert
+    IllegalOperationException exception = assertThrows(
+            IllegalOperationException.class,
+            () -> refugioService.addGato(pequeno.getId(), segundoGato.getId()));
+    assertEquals("El refugio ya alcanzó su capacidad", exception.getMessage());
+}
+```
+
+Un refugio de capacidad 1 con un gato ya asociado deja el escenario listo para violar la regla.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Pruebas de API con Postman
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## De probar a mano a probar con scripts
+
+Ya usamos Postman para enviar peticiones y mirar la respuesta.
+
+- Ahora cada request tiene un script que **decide** si la respuesta es correcta
+- La colección completa se puede ejecutar con un clic
+- La misma colección corre en el pipeline con Newman
+
+Postman es una prueba de caja negra: solo mira lo que entra y lo que sale por HTTP.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Un script de test
+
+Va en la pestaña **Tests** de la request y corre cuando llega la respuesta.
+
+```javascript
+pm.test("Status code es 201 Created", () => pm.expect(pm.response.code).to.equal(201));
+
+pm.test("El servidor asigna el id y respeta los datos", () => {
+    const gato = pm.response.json();
+    pm.expect(gato.id).to.be.a("number");
+    pm.expect(gato.nombre).to.equal("Michi");
+});
+```
+
+- `pm.test(nombre, función)` define una prueba con nombre
+- `pm.expect(valor)` compara con aserciones
+- `pm.response` da acceso al código, los headers y el cuerpo
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## AAA también en Postman
+
+| Momento | Dónde ocurre |
+| --- | --- |
+| Arrange | El cuerpo de la request, las variables y las requests previas que crean los datos |
+| Act | Enviar la request |
+| Assert | Los scripts de la pestaña Tests |
+
+Es igual que con JUnit: preparar, ejecutar una sola acción y verificar.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Variables de colección
+
+Un `POST` guarda el id que asignó el servidor y las siguientes requests lo usan.
+
+```javascript
+// Tests de "Crear un gato"
+pm.collectionVariables.set("gatoId", pm.response.json().id);
+```
+
+```text
+GET    {{baseUrl}}/gatos/{{gatoId}}
+PUT    {{baseUrl}}/gatos/{{gatoId}}
+DELETE {{baseUrl}}/gatos/{{gatoId}}
+```
+
+- Evita escribir ids fijos que dependen de `data.sql`
+- `{{baseUrl}}` apunta al servidor y es la variable que espera el pipeline
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## CRUD completo por entidad
+
+| Request | Verifica |
+| --- | --- |
+| Listar | `200`, arreglo no vacío |
+| Crear | `201`, id asignado, guarda `gatoId` |
+| Obtener por id | `200`, el id es el creado |
+| Actualizar | `200`, refleja los cambios |
+| Error `400` | Una regla violada con su mensaje |
+| Error `404` | Un id inexistente con su mensaje |
+| Borrar | `204` sin cuerpo |
+| Obtener lo borrado | `404` |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.68em;">
+
+## Una regla violada
+
+`POST /gatos` con `"nombre": ""`
+
+```javascript
+pm.test("Status code es 400 Bad Request",
+    () => pm.expect(pm.response.code).to.equal(400));
+
+pm.test("Incluye el mensaje del service",
+    () => pm.expect(pm.response.text()).to.include("El nombre es obligatorio"));
+```
+
+- Verificamos el código **y** el mensaje
+- Por cada regla de negocio, una request que la viole
+- El mensaje es el mismo que probamos en JUnit
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Requests de asociación
+
+Cada endpoint de asociación suma tres requests como mínimo.
+
+| Request | Verifica |
+| --- | --- |
+| Asociar un gato | `200`, el `RefugioDTOCompleto` incluye al gato |
+| Error `400` | El gato ya pertenece al refugio, o el refugio está lleno |
+| Error `404` | Refugio o gato inexistente |
+| Listar los gatos del refugio | `200`, contiene al gato asociado |
+| Desasociar | `204` |
+
+```javascript
+pm.test("Responde el refugio completo con el gato asociado", () => {
+    const refugio = pm.response.json();
+    pm.expect(refugio.gatos).to.have.lengthOf(1);
+});
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Colecciones que se pueden ejecutar solas
+
+Newman ejecuta cada colección de `backend/collections/` contra el `.jar` del backend que arranca el pipeline.
+
+- La colección crea los datos que necesita: refugio, gatos
+- Es importante el orden en el que se hacen las pruebas: POST, GET, PUT y DELETE
+- No depende de ids fijos ni del orden en que se ejecutó antes
+- Limpia al final lo que creó
+- Usa `{{baseUrl}}`, nunca `localhost` escrito a mano
+- Si un `pm.expect` falla, Newman termina con error
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El front y `DTOCompleto`
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## El front depende del contrato
+
+`GET /refugios/1` responde un `RefugioDTOCompleto`.
+
+```json
+{
+  "id": 1,
+  "nombre": "Huellitas",
+  "direccion": "Calle 18 # 7-21",
+  "telefono": "6015550101",
+  "capacidad": 20,
+  "gatos": [
+    { "id": 1, "nombre": "Milo J", "edad": 3 }
+  ]
+}
+```
+
+Si la interfaz TypeScript no tiene `gatos`, el front recibe los datos pero TypeScript no deja usarlos.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Del DTO de Java a la interfaz de TypeScript
+
+| Java | TypeScript |
+| --- | --- |
+| `RefugioDTO` | `Refugio` |
+| `RefugioDTOCompleto` | `RefugioCompleto extends Refugio` |
+| `Long`, `Integer` | `number` |
+| `String` | `string` |
+| `List<GatoDTO>` | `Gato[]` |
+
+Un DTO de Java y su interfaz tienen los mismos nombres de atributos.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Los modelos
+
+```typescript
+// Análogo a RefugioDTO
+export interface Refugio {
+  id: number;
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  capacidad: number;
+}
+
+// Análogo a RefugioDTOCompleto
+export interface RefugioCompleto extends Refugio {
+  gatos: Gato[];
+}
+```
+
+`RefugioCompleto` repite lo que hace el back: hereda lo básico y agrega la colección.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## El servicio con la asociación
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class RefugioService {
+  private http: HttpClient = inject(HttpClient);
+
+  readonly refugios = httpResource<RefugioCompleto[]>(
+    () => `${environment.baseUrl}/refugios`);
+
+  asociarGato(refugioId: number, gatoId: number): Observable<RefugioCompleto> {
+    return this.http.post<RefugioCompleto>(
+      `${environment.baseUrl}/refugios/`${refugioId}/gatos/$`{gatoId}`, null);
+  }
+
+  desasociarGato(refugioId: number, gatoId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.baseUrl}/refugios/`${refugioId}/gatos/$`{gatoId}`);
+  }
+}
+```
+
+- El `POST` de asociación no lleva cuerpo, por eso envía `null`
+- La respuesta se tipa como `RefugioCompleto`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Qué debe funcionar en el front
+
+- Los modelos coinciden con los `DTOCompleto` del back
+- La lista y el detalle muestran lo que responde el back JPA
+- El formulario de creación guarda y la lista se refresca
+- Cuando el back responde `400`, el usuario ve el mensaje del service
+- El registro creado queda guardado en el back
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Demo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Ahora es su turno: Release 7
+
+Usen el tiempo restante de la clase para cerrar [Release 7: Lógica de negocio y controllers](https://recursos-isis-2211.virtual.uniandes.edu.co/proyecto/segunda_parte/release7/).
+
+1. Escriban las pruebas del Service de cada entidad con `@DataJpaTest`: mínimo dos por método, un caso feliz y uno de error, organizadas con AAA.
+2. Ejecuten `./mvnw test` antes del push y confirmen que el pipeline queda en verde.
+3. Documenten en la wiki cada endpoint de asociación: recurso dueño, asociado, ruta, respuesta y errores.
+4. Implementen la lógica en el Service del recurso dueño, que inyecta el service de la otra entidad. No creen un service con el nombre de dos entidades.
+5. Expongan los endpoints de asociación en el controller del dueño y respondan `DTOCompleto`.
+6. Completen sus colecciones de Postman: CRUD, reglas violadas y tres requests por endpoint de asociación, con scripts `pm.expect`.
+7. Alineen los modelos TypeScript con `DTOCompleto` y comprueben lista, detalle y creación con el back JPA.
+8. Abran el PR cuando las pruebas estén en verde.
+
+</div>
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
