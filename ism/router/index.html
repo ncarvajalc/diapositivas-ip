@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Router, navegación y asociaciones en el front
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Agenda
+
+- ¿Dónde estamos?
+- Motivación: ¿por qué importa la interfaz?
+- Hall of Shame de UI
+- r/badUIbattles
+- Taller: layout y look and feel
+- El Router
+- Dos tipos de detalle
+- El cliente HTTP con el Router
+- Selector con opciones de otro módulo
+- Asociaciones desde el front
+- Demo
+- ¿Preguntas?
+- Trabajo práctico: Release 8
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Dónde estamos?
+
+- Back completo: `Service`, `DTO`, asociaciones y pruebas
+- Front con componentes sueltos, todos en `app.html`
+- Sin menú, sin URLs propias y sin vista de inicio
+
+Ahora pondremos al día el front con el back
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Lo que falta para cerrar el Release 8
+
+<div style="width: 80%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    D[Diseño de la interfaz] --> R[Router y menú]
+    R --> T[Detalle por ruta]
+    T --> A[Asociación]
+    A --> P[Recorrido end to end]
+
+</div>
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Motivación
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Para el usuario, la interfaz es el producto
+
+- No ve la arquitectura por capas, ni los `Service`, ni las pruebas, ni Postman (esto es para el equipo de ingeniería, no para el usuario final)
+- Ve pantallas, menús, botones y mensajes
+- Si no encuentra cómo hacer una tarea, para él el sistema no funciona
+- Un back perfecto con una mala interfaz es un producto malo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## ¿Por qué importa tener una buena UI?
+
+- **Confianza**: una interfaz descuidada hace dudar de todo el producto
+- **Errores**: una pantalla confusa lleva a datos mal ingresados, y eso cuesta soporte y correcciones
+- **Eficiencia**: una tarea de segundos se vuelve un recorrido de minutos
+- **Accesibilidad**: contraste, tamaños y navegación por teclado deciden quién puede usar el producto
+- **Abandono**: el usuario que no entiende la pantalla se va a otro producto
+- **Costo de cambio**: rehacer la interfaz al final es más caro que diseñarla bien al inicio
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Hall of Shame de UI
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## El Hall of Shame del curso
+
+[Hall of Shame de UI](https://recursos-isis-2211.virtual.uniandes.edu.co/html-interactivos/hall-of-shame-ui.html)
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## r/badUIbattles
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## r/badUIbattles
+
+
+
+[r/badUIbattles](https://www.reddit.com/r/badUIbattles/)
+
+Una comunidad de Reddit donde se publican interfaces muy malas. Muchas están hechas a propósito, y por eso mismo enseñan qué no hacer.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Taller: layout y look and feel
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Antes de programar, diseñamos
+
+[Taller: layout y look and feel](https://recursos-isis-2211.virtual.uniandes.edu.co/talleres/taller-layout-y-look-and-feel/)
+
+Hoy `app.html` tiene todos los componentes. El Release 8 le da a cada vista su propia URL, así que primero hay que decidir cómo se ve y cómo se navega.
+
+Cada equipo debe hacer:
+
+- Un **layout**: qué regiones son fijas y dónde se pinta cada vista
+- Un **menú** y una **vista por defecto**
+- Un **look and feel** compartido
+- Un **prototipo en HTML** publicado en la wiki
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El Router
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Una aplicación de una sola página
+
+- Single Page Application (SPA)
+- Angular cambia la vista con JavaScript, sin pedir una página nueva al servidor
+- Sin Router, la aplicación no tiene URLs que compartir
+- El botón atrás no sirve y recargar la página regresa al inicio
+
+El Router conecta la URL con la vista. **La URL es el estado de lo que se ve.**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Tres ideas de cualquier router
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    U["URL: /gatos/3"] --> T[Tabla de rutas]
+    T --> C[Componente DetalleGato]
+    C --> O["router-outlet"]
+
+</div>
+
+
+</div>
+
+- **Definir las rutas**: la tabla que asocia cada URL con una vista
+- **Llamar las rutas**: con un enlace en el template o desde el código
+- **Indicar dónde se muestra la vista**: el "hueco" dentro del layout
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Spring y Angular hacen lo mismo en dos lugares
+
+| | Back (Spring) | Front (Angular Router) |
+| --- | --- | --- |
+| Asocia | Una URL con un método del controller | Una URL con un componente |
+| Se define con | `@GetMapping("/{id}")` | `{ path: 'gatos/:id', component: ... }` |
+| Se ejecuta en | El servidor | El navegador |
+| Produce | JSON | Una vista |
+| Si nada coincide | `404` | La vista de "no encontrado" |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Activar el Router
+
+```typescript
+// app.config.ts
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(),
+    provideRouter(routes, withComponentInputBinding()),
+  ],
+};
+```
+
+- `provideRouter` se registra igual que `provideHttpClient()`
+- `withComponentInputBinding()` entrega los parámetros de la URL como `input()` del componente
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Definir las rutas
+
+```typescript
+// app.routes.ts
+export const routes: Routes = [
+  { path: '', redirectTo: 'gatos', pathMatch: 'full' },
+  { path: 'gatos', component: ListaGatos, title: 'Gatos' },
+  { path: 'gatos/nuevo', component: CrearGato, title: 'Nuevo gato' },
+  { path: 'gatos/:id', component: DetalleGato, title: 'Gato' },
+  { path: 'refugios', component: ListaRefugios, title: 'Refugios' },
+  { path: 'refugios/:id', component: DetalleRefugio, title: 'Refugio' },
+  { path: 'refugios/:id/add-gato', component: AsociarGato, title: 'Asociar gato' },
+  { path: '**', component: NoEncontrado, title: 'No encontrado' },
+];
+```
+
+Un arreglo de tipo `Routes`. Cada entrada asocia un `path` con un `component`. El `title` cambia el título de la pestaña.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## El orden de las rutas importa
+
+**El Router usa la primera ruta que coincide.**
+
+- `redirectTo` en la raíz necesita `pathMatch: 'full'`. Sin él, Angular lanza el error `NG04014` al arrancar
+- `gatos/nuevo` va **antes** de `gatos/:id`, porque `:id` también coincide con `nuevo`
+- La comodín `'**'` va **al final**: atiende cualquier URL que no coincidió antes
+
+La comodín muestra una vista de "no encontrado", el equivalente del `404` del back.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## Dónde se muestra la vista
+
+```html
+<!-- app.html -->
+<nav class="navbar ...">
+  ...
+</nav>
+
+<main class="container py-4">
+  <router-outlet ></router>
+</main>
+```
+
+```typescript
+// app.ts
+@Component({
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  ...
+})
+export class App {}
+```
+
+- `<router-outlet ></router>` es el hueco donde Angular pinta el componente de la ruta activa
+- Lo que lo rodea, como el menú, permanece al cambiar de ruta
+- Las vistas ya no se importan en `App`: las carga el Router
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Llamar una ruta con `routerLink`
+
+```html
+<a routerLink="/gatos">Gatos</a>
+
+<a [routerLink]="['/gatos', gato().id]">Ver detalle</a>
+```
+
+| | `href` | `routerLink` |
+| --- | --- | --- |
+| ¿Recarga la página? | Sí | No |
+| ¿Conserva el estado de la aplicación? | No | Sí |
+
+- Con expresiones se usa `[routerLink]` y un arreglo de segmentos: `['/gatos', id]`
+- El componente que tiene el enlace debe importar `RouterLink`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## El menú con `routerLinkActive`
+
+```html
+<a class="nav-link" routerLink="/gatos"
+   routerLinkActive="active" ariaCurrentWhenActive="page">Gatos</a>
+```
+
+- Agrega la clase `active` al enlace de la vista actual. Así el usuario sabe cuál link está activo al darle clic
+- Por defecto compara por **prefijo**: `/gatos` queda activo en `/gatos/3` y en `/gatos/nuevo`
+- Si un ítem es prefijo de otro, y no queremos que ambos se marquen, usamos coincidencia exacta:
+
+```html
+<a routerLink="/gatos" routerLinkActive="active"
+   [routerLinkActiveOptions]="{ exact: true }">Gatos</a>
+```
+
+El componente con el menú debe importar `RouterLink` y `RouterLinkActive`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Parámetros de ruta
+
+`gatos/:id` tiene un segmento variable. El componente lo recibe como un `input()` del **mismo nombre**.
+
+```typescript
+export class DetalleGato {
+  readonly id = input.required<string>();
+}
+```
+
+- Funciona gracias a `withComponentInputBinding()`
+- El valor llega como **texto**. Si necesitamos un número, lo convertimos: `Number(this.id())`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Navegar desde el código
+
+```typescript
+private readonly router = inject(Router);
+
+this.router.navigate(['/refugios', this.id()]);
+```
+
+Usa el mismo arreglo de segmentos que `routerLink`.
+
+**2 casos:**
+
+- Si el usuario ve y pulsa un enlace: `routerLink`
+- Si la navegación es consecuencia de otra acción, como volver al detalle después de guardar o de asociar: `router.navigate`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Dos tipos de detalle
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Dos formas de mostrar un detalle
+
+| Aspecto | Detalle en memoria | Detalle por ruta |
+| --- | --- | --- |
+| Origen del dato | Lo que la lista ya tiene | El servidor, con el `id` de la URL |
+| URL propia | No | Sí |
+| Al recargar | Se pierde | Se conserva |
+| Enlace compartible | No | Sí |
+| Petición extra | No | Sí, una por detalle |
+
+**Para decidir**
+
+- ¿La lista ya trae todo lo que el detalle necesita?
+- ¿El detalle debe tener su propio enlace?
+- ¿Necesita información que solo tiene el servidor?
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## En nuestro demo: detalle por ruta
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    U["/gatos/3"] --> R[Router]
+    R --> D["DetalleGato (id = 3)"]
+    D --> H["GET /gatos/3"]
+    H --> V[Vista con el gato]
+
+</div>
+
+
+</div>
+
+- La tarjeta de la lista enlaza con `[routerLink]`
+- El detalle recibe el `id` y le pide el gato al back
+- Recargar la página o compartir la URL sigue funcionando
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## El servicio: una URL que depende del `id`
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class GatoService {
+  gatoResource(id: () => string | undefined): HttpResourceRef<Gato | undefined> {
+    return httpResource<Gato>(() => {
+      const valor: string | undefined = id();
+      return valor ? `${environment.baseUrl}/gatos/${valor}` : undefined;
+    });
+  }
+}
+```
+
+- En vez de un texto fijo, `httpResource` recibe una **función** que devuelve la URL
+- Si esa función lee un signal, Angular la ejecuta de nuevo cuando el signal cambia y hace una petición nueva
+- Si devuelve `undefined`, no hay petición
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## El componente de detalle
+
+```typescript
+export class DetalleGato {
+  private readonly gatoService = inject(GatoService);
+
+  readonly id = input.required<string>();
+
+  protected readonly recurso = this.gatoService.gatoResource(() => this.id());
+
+  protected readonly gato = computed(() =>
+    this.recurso.hasValue() ? this.recurso.value() : undefined,
+  );
+
+  protected readonly noExiste = computed(() => {
+    const error: unknown = this.recurso.error();
+    return error instanceof HttpErrorResponse && error.status === 404;
+  });
+}
+```
+
+El recurso se crea al inicializar el campo, que es un contexto de inyección.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## La plantilla: cargando, 404, error y datos
+
+```html
+<a routerLink="/gatos">&larr; Volver a los gatos</a>
+
+@if (recurso.isLoading()) {
+  <p class="mt-3 text-body-secondary">Cargando gato...</p>
+}
+
+@if (noExiste()) {
+  <div class="alert alert-warning mt-3">Ese gato no existe.</div>
+} @else if (recurso.error()) {
+  <div class="alert alert-danger mt-3">No se pudo cargar el gato por un error inesperado. 
+  Intenta de nuevo más tarde. Si el error persiste contacta a ...</div>
+}
+
+@if (gato(); as detalle) {
+  <h1 class="card-title h3">{{ detalle.nombre }}</h1>
+  ...
+}
+```
+
+Un `404` no es lo mismo que un error: el usuario necesita un mensaje explícito
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Un mismo componente, dos formas de llamarlo
+
+Los tutoriales del Release 8 hacen que un mismo detalle sirva para los **dos tipos**.
+
+- **Desde un padre** (`<app-detalle ></app>`): lee una signal compartida que llenó el clic de la lista
+- **Desde una ruta** (`gatos/:id`): recibe el `id`, pide el recurso y copia la respuesta a la misma signal
+
+```typescript
+readonly id = input<string>();   // opcional: sin ruta queda undefined
+
+constructor() {
+  effect(() => {
+    if (!this.id()) return;      // sin id, la lista ya llenó la signal
+    this.gatoService.seleccionar(
+      this.recurso.hasValue() ? this.recurso.value() : undefined);
+  });
+}
+```
+
+Con `hasValue()` se evita leer un recurso en error. Mientras carga o si falla, la selección queda vacía para no mostrar el gato anterior.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El cliente HTTP con el Router
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## `hasValue()` antes de `value()`
+
+Un `httpResource` tiene tres estados:
+
+| Estado | `isLoading()` | `error()` | `hasValue()` | `value()` |
+| --- | --- | --- | --- | --- |
+| Cargando | `true` | `undefined` | `false` | `undefined` |
+| Con datos | `false` | `undefined` | `true` | Los datos |
+| Con error | `false` | El error | `false` | **Lanza una excepción** |
+
+- En estado de error, `value()` lanza una excepción y rompe la vista
+- `value() ?? []` no basta: la excepción ocurre antes de que actúe el `??`
+- Siempre preguntamos `hasValue()` primero, también dentro de un `computed` o un `effect`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## Manejo de errores del back
+
+`HttpClient` y `httpResource` entregan un `HttpErrorResponse`.
+
+| `status` | Qué pasó | Qué mostramos |
+| --- | --- | --- |
+| `0` | Sin respuesta: servidor caído o bloqueo del navegador (CORS) | Un mensaje general, no hay cuerpo que leer |
+| `400` | El back rechazó la operación por una regla de negocio | El mensaje del service |
+| `404` | El recurso no existe | El mensaje del service o uno propio |
+
+```typescript
+export function leerMensaje(error: HttpErrorResponse): string {
+  if (error.status === 0) {
+    return 'No se pudo conectar con el servidor.';
+  }
+  return typeof error.error === 'string' ? error.error : 'No se pudo completar la operación.';
+}
+```
+
+Nuestro `RestExceptionHandler` responde el mensaje como texto. Si un back responde JSON, el mensaje está en `error.error.message`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## `POST` sin cuerpo
+
+Asociar dos recursos que ya existen: los dos ids viajan en la URL y no hay nada que enviar.
+
+```typescript
+asociarGato(refugioId: number, gatoId: number): Observable<RefugioCompleto> {
+  return this.http.post<RefugioCompleto>(
+    `${environment.baseUrl}/refugios/`${refugioId}/gatos/$`{gatoId}`,
+    null,
+  );
+}
+```
+
+- El segundo argumento es `null`: la petición sale sin cuerpo y sin `Content-Type`
+- La respuesta sí trae datos: el `RefugioDTOCompleto` actualizado, por eso se tipa
+- Necesita de `.subscribe(...)` para su envío
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Selector con opciones de otro módulo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Elegir en vez de escribir
+
+Para asociar un gato a un refugio, el usuario no debería escribir el id de un gato.
+
+- **Prevención de errores**: no puede escribir un id que no existe
+- **Reconocer antes que recordar**: ve los nombres, no los números
+- Las opciones salen del back: `GET /gatos`
+
+El selector es un formulario reactivo como los que ya hicimos, con una diferencia: sus opciones vienen de **otro módulo**.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El dueño usa el Service del asociado
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    A[AsociarGato] --> R[RefugioService]
+    A --> G[GatoService]
+    R --> B1["POST /refugios/id/gatos/gatoId"]
+    G --> B2["GET /gatos"]
+
+</div>
+
+
+</div>
+
+El front repite la convención del back: la vista de asociación es del módulo **dueño** de la ruta y usa el Service del módulo asociado para llenar el selector.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## El selector y sus estados
+
+```html
+@if (gatos.isLoading()) {
+  <p class="text-body-secondary">Cargando gatos...</p>
+} @else if (gatos.error()) {
+  <div class="alert alert-danger">No se pudieron cargar los gatos.</div>
+} @else if (gatos.hasValue() && gatos.value().length === 0) {
+  <p>No hay gatos para elegir.</p>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="asociar()">
+    <select id="gatoId" class="form-select" formControlName="gatoId">
+      <option [ngValue]="null">Elige un gato</option>
+      @for (gato of gatos.value() ?? []; track gato.id) {
+        <option [ngValue]="gato.id">{{ gato.nombre }} - ({{ gato.raza }})</option>
+      }
+    </select>
+    <button type="submit" [disabled]="form.invalid || guardando()">Asociar gato</button>
+  </form>
+}
+```
+
+Cuatro situaciones: cargando, error, sin opciones y con opciones.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## `[ngValue]`, la opción inicial y el control
+
+```typescript
+protected readonly form = new FormGroup({
+  gatoId: new FormControl<number | null>(null, { validators: [Validators.required] }),
+});
+```
+
+- **`[ngValue]` y no `[value]`**: con `[value]` el id llega como texto (`"4"`). Con `[ngValue]` llega como número
+- **Opción inicial** `[ngValue]="null"`: "Elige un gato". Con `Validators.required`, el botón sigue deshabilitado hasta que el usuario elija
+- **Sin `nonNullable`**: un selector sin elección no tiene un valor natural de tipo `number`, por eso el tipo es `number | null`
+- **`FormGroup` obligatorio**: un `<form>` sin `[formGroup]` no dispara `(ngSubmit)` y la página se recarga
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Asociaciones desde el front
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Recordemos el endpoint
+
+`POST /refugios/{id}/gatos/{gatoId}`
+
+- El primer recurso de la ruta es el **dueño**: el refugio
+- No lleva cuerpo
+- `200` con el `RefugioDTOCompleto`; `404` si falta alguno de los dos; `400` si el gato ya está en este refugio, está en otro o el refugio llegó a su capacidad
+
+El front necesita dos cosas: una **vista** para elegir el gato y una **llamada** a este endpoint.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El recorrido del usuario
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    D["Detalle del refugio"] --> A["/refugios/1/add-gato"]
+    A --> S[Elegir un gato]
+    S --> P["POST sin cuerpo"]
+    P --> V["Detalle del refugio con el gato"]
+
+</div>
+
+
+</div>
+
+- La vista tiene su propia ruta y se alcanza con un enlace desde el detalle
+- Al terminar, la app vuelve al detalle y el usuario ve el resultado
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## La ruta y el enlace
+
+```typescript
+// app.routes.ts
+{ path: 'refugios/:id/add-gato', component: AsociarGato, title: 'Asociar gato' },
+```
+
+```html
+<!-- detalle-refugio.html -->
+<a class="btn btn-primary" [routerLink]="['/refugios', detalle.id, 'add-gato']">
+  Asociar un gato
+</a>
+```
+
+- El `id` del refugio llega al componente por `withComponentInputBinding()`, igual que en el detalle
+- La ruta se registra en `app.routes.ts`, que es un archivo **compartido** entre los módulos
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## El componente de asociación: los datos
+
+```typescript
+export class AsociarGato {
+  private readonly refugioService = inject(RefugioService);
+  private readonly router = inject(Router);
+
+  readonly id = input.required<string>();
+  protected readonly gatos = inject(GatoService).gatos;   // las opciones: GET /gatos
+
+  protected readonly form = new FormGroup({
+    gatoId: new FormControl<number | null>(null, { validators: [Validators.required] }),
+  });
+  protected readonly guardando = signal(false);
+  protected readonly mensajeError = signal('');
+}
+```
+
+- El componente es del módulo dueño (refugios) e inyecta `GatoService` para las opciones
+- `guardando` deshabilita el botón mientras viaja la petición
+- `mensajeError` guarda el mensaje que dice el back
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.68em;">
+
+## El componente de asociación: asociar
+
+```typescript
+asociar(): void {
+  const gatoId = this.form.controls.gatoId.value;
+  if (gatoId === null) return;
+  this.guardando.set(true);
+  this.mensajeError.set('');
+  this.refugioService.asociarGato(Number(this.id()), gatoId).subscribe({
+    next: () => {
+      this.guardando.set(false);
+      this.refugioService.refugios.reload();
+      this.router.navigate(['/refugios', this.id()]);
+    },
+    error: (error: HttpErrorResponse) => {
+      this.guardando.set(false);
+      this.mensajeError.set(leerMensaje(error));
+    },
+  });
+}
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Después de asociar
+
+- **Si salió bien**: pedimos de nuevo la lista de refugios (`refugios.reload()`) porque trae los gatos de cada uno, y navegamos al detalle con `router.navigate`
+- El detalle crea su recurso al abrirse, así que pide el refugio actualizado y muestra el gato recién asociado
+- **Si salió mal**: nos quedamos en la vista y mostramos el mensaje del back
+
+| Situación | Lo que ve el usuario |
+| --- | --- |
+| El gato ya está en otro refugio | `El gato ya pertenece a otro refugio` |
+| El refugio está lleno | `El refugio ya alcanzó su capacidad` |
+| El servidor está caído | `No se pudo conectar con el servidor.` |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Desasociar desde el detalle
+
+```typescript
+quitar(gatoId: number): void {
+  this.refugioService.desasociarGato(Number(this.id()), gatoId).subscribe({
+    next: () => {
+      this.recurso.reload();
+      this.refugioService.refugios.reload();
+    },
+    error: (error: HttpErrorResponse) => this.mensajeError.set(leerMensaje(error)),
+  });
+}
+```
+
+- `DELETE /refugios/{id}/gatos/{gatoId}` responde `204` sin cuerpo
+- `recurso.reload()` vuelve a pedir el refugio y la lista queda actualizada
+- Desasociar no borra el gato: queda libre para asociarlo a otro refugio
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Reglas de coordinación del grupo
+
+- **`app.routes.ts` es compartido**: solo lo modifica quien tenga el PR activo
+- **El componente de asociación lo escribe el integrante del módulo dueño**
+- El integrante del módulo asociado expone su Service con `httpResource`
+- Si un componente depende de un Service que todavía no está en `main`, el PR espera
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Demo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Ahora es su turno: Release 8
+
+Usen el tiempo restante de la clase para avanzar en el Release.
+
+1. Hagan el taller de layout y look and feel en equipo y publiquen la página "Diseño de la interfaz" en la wiki. Nadie programa hasta que todos la aprueben.
+2. Registren el acuerdo de navegación: rutas, menú y tipo de vista de asociación.
+3. Configuren el Router y construyan el menú con `routerLink` y `routerLinkActive`.
+4. Creen los detalles por ruta con `withComponentInputBinding()` y manejen el `404`.
+5. Escriban un componente de asociación por cada asociación acordada en el Release 7, con su selector, su ruta y un enlace desde el detalle. Lo escribe el integrante del módulo dueño.
+6. Coordinen `app.routes.ts`: solo lo modifica quien tenga el PR activo.
+
+</div>
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
