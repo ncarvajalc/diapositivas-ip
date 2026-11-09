@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Pruebas del front y de punta a punta
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Agenda
+
+- ¿Dónde estamos?
+- Por qué probar el front
+- Qué puede fallar y qué nivel lo encuentra
+- La estrategia del Release 8
+- Pruebas con Vitest: servicio, ruta, componente y contrato
+- Romper el código a propósito
+- Cobertura
+- Pruebas de punta a punta con Playwright
+- Demo
+- ¿Preguntas?
+- Trabajo práctico: Release 8
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Dónde estamos?
+
+- Router, menú, detalle por ruta y vistas de asociación
+- Back con CRUD, reglas, asociaciones y pruebas con JUnit
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Lo que falta
+
+<div style="width: 80%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    E[Estrategia] --> V[Pruebas con Vitest]
+    V --> C[Contrato]
+    C --> K[Cobertura]
+    K --> P[Recorrido de punta a punta]
+
+</div>
+
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Por qué probar el front
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Qué ganamos con probar el front
+
+- **Detectar errores antes que el usuario**: pantallas en blanco cuando el back falla, enlaces a vistas equivocadas
+- **Refactorizar con confianza**: cambiamos el código y la prueba avisa si algo se rompió
+- **Notar cuándo el front y el back dejan de coincidir**: por ejemplo, un campo que cambió de nombre
+- **Documentar el comportamiento esperado**: el nombre de la prueba dice qué debe pasar
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Qué puede fallar en un front
+
+| Zona | Ejemplo de error |
+| --- | --- |
+| Servicios | URL, verbo o cuerpo de una petición equivocados |
+| Lo que se pinta | Una lista incompleta o un mensaje de error que nunca aparece |
+| Navegación | Una ruta equivocada, o un detalle que no lee el `id` de la URL |
+| Comunicación con el back | Nombres de campos distintos, o un `404` o `400` sin manejar |
+| Integración real | El navegador bloquea la respuesta por CORS |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Los niveles de prueba
+
+| Nivel | Qué prueba | Velocidad | Fragilidad |
+| --- | --- | --- | --- |
+| Servicio | Un servicio, sin pintar nada | Muy rápida | Baja |
+| Componente | Un componente con su plantilla y estado, con el back simulado | Rápida | Baja a media |
+| Integración | Rutas, componentes y servicios juntos, con el back simulado | Media | Media |
+| Punta a punta (e2e) | La aplicación completa en un navegador, contra el back real | Lenta | Alta |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## La pirámide de pruebas
+
+<div style="width: 80%; margin-left: -10%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart TB
+    A["Punta a punta: pocas, lentas"] --> B["Integración y componente"]
+    B --> C["Servicio: muchas, rápidas"]
+
+</div>
+
+
+</div>
+
+- Muchas pruebas rápidas abajo y pocas lentas arriba
+- Las lentas cuestan más de mantener y, al fallar, señalan con menos precisión dónde está el error
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Mock de prueba y contrato
+
+Las pruebas de servicio y de componente **no llaman al back real**. Usan un **mock** que responde lo que la prueba indica.
+
+- Es rápido y no depende de que el back esté corriendo ni de sus datos
+- Permite provocar errores que el back rara vez produce a pedido: `400`, `404`, `500`
+
+Pero un mock puede **mentir**: si simula un campo que el back ya no envía, la prueba pasa y la aplicación falla.
+
+La **prueba de contrato** guarda una respuesta real del back y comprueba que cabe en los modelos TypeScript del front.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## ¿Qué nivel encuentra cada error?
+
+| Error | Lo encuentra |
+| --- | --- |
+| URL equivocada en un `POST` | Prueba de servicio |
+| Una vista que se rompe ante un error del back | Prueba de componente con una respuesta de error simulada |
+| Una ruta que no muestra el recurso indicado | Prueba de integración de rutas |
+| El back envía `imagen` y el front espera `foto` | Prueba de contrato |
+| El navegador bloquea la respuesta por CORS | **Solo** la prueba de punta a punta |
+
+Ni las pruebas con mock ni Postman detectan CORS.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Principios
+
+- Un escenario positivo y uno negativo
+- Cada prueba es independiente de las demás
+- Probamos el **comportamiento**, no la implementación
+- Si rompemos a propósito el código que la prueba protege, la prueba tiene que fallar
+
+**Qué no probar**
+
+- El framework
+- Componentes triviales
+- La cobertura como objetivo: puede ser alta con pruebas que no verifican nada
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Las herramientas del curso
+
+| Herramienta | Nivel | ¿Obligatoria? |
+| --- | --- | --- |
+| **Vitest** | Servicio, componente e integración, con el back simulado | Sí. Corre con `ng test` y en el pipeline |
+| **Playwright** | Punta a punta, contra el back real | No. Es opcional |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## La estrategia del Release 8
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Los mínimos por módulo
+
+El Release 8 pide, **por módulo**:
+
+| Prueba | Qué comprueba | Mínimo |
+| --- | --- | --- |
+| Servicio | URL, verbo y cuerpo de las llamadas | 1 |
+| Ruta | El detalle muestra el componente y el recurso correctos, y un `404` se maneja | 1 |
+| Componente de asociación | Llama al endpoint correcto y muestra el mensaje del back si falla | 2 (éxito y error) |
+| Contrato | Una respuesta real del back, guardada como ejemplo, cabe en el modelo TypeScript | 1 |
+
+Las pruebas usan respuestas HTTP simuladas: no levantan el back.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Cómo se eligen los escenarios
+
+Cruzamos lo que el back puede responder con cada pieza del front. No hace falta llenar todas las celdas.
+
+| Respuesta del back | Servicio | Detalle por ruta | Componente de asociación |
+| --- | --- | --- | --- |
+| Éxito (`200`) | Entrega el resultado | Pinta el recurso | Navega al detalle |
+| Regla violada (`400`) | Entrega el mensaje | No aplica | Muestra el mensaje y no navega |
+| No existe (`404`) | Entrega el error | Indica que no existe | No aplica |
+| Falla (`500`) o sin respuesta (`status 0`) | Entrega el error | Muestra un mensaje sin romper la vista | Muestra un mensaje general |
+| Lista vacía | No aplica | No aplica | Avisa que no hay gatos |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Pruebas con Vitest
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Qué es Vitest y cómo se corre
+
+Vitest es el ejecutor de pruebas que usa Angular para las pruebas de servicio, de componente y de integración.
+
+- Las pruebas viven en archivos `*.spec.ts`, **junto al código** que prueban
+- Corren en un navegador simulado (jsdom), por eso son rápidas
+
+```bash
+ng test                  # modo watch
+ng test --watch=false    # una sola corrida
+npm test                # lo que ejecuta el pipeline
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Anatomía de una prueba
+
+```typescript
+describe('RefugioService', () => {
+  beforeEach(() => { /* dejar el estado limpio */ });
+  afterEach(() => { /* verificar y limpiar */ });
+
+  it('asociarGato debería mandar POST sin body', () => {
+    // Arrange, Act, Assert
+    expect(req.request.method).toBe('POST');
+  });
+});
+```
+
+- `describe` agrupa, `it` define una prueba y `expect(valor).matcher(esperado)` compara: `toBe`, `toEqual`, `toContain`, `toBeNull`
+- `beforeEach` y `afterEach` dejan cada prueba en un estado limpio
+- `TestBed` arma un módulo mínimo de Angular para la prueba
+- Es el mismo **Arrange, Act, Assert** de JUnit
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Simular el back con `HttpTestingController`
+
+```typescript
+TestBed.configureTestingModule({
+  providers: [provideHttpClient(), provideHttpClientTesting()],
+});
+const http = TestBed.inject(HttpTestingController);
+```
+
+| Método | Para qué sirve |
+| --- | --- |
+| `http.expectOne(url)` | Verifica que salió exactamente una petición a esa URL |
+| `req.flush(cuerpo, opciones)` |  Sin opciones es un `200`; con `{ status: 400, statusText: '...' }` es un error. |
+| `http.verify()` | En `afterEach`: falla si quedó una petición sin responder |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Probar un servicio
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## El servicio pide su lista al crearse
+
+```typescript
+beforeEach(() => {
+  TestBed.configureTestingModule({
+    providers: [provideHttpClient(), provideHttpClientTesting()],
+  });
+  service = TestBed.inject(RefugioService);
+  http = TestBed.inject(HttpTestingController);
+
+  // El servicio pide la lista de refugios al crearse: se responde para que no quede pendiente
+  http.match(`${base}/refugios`).forEach((req) => req.flush([]));
+});
+
+afterEach(() => {
+  http.verify();   // falla si quedó una petición sin responder
+});
+```
+
+- `http.match(url)` devuelve las peticiones pendientes a esa URL, y `flush([])` las responde
+- Si no respondemos la lista, `verify()` falla en **todas** las pruebas
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Éxito y error de `asociarGato`
+
+```typescript
+it('asociarGato debe mandar POST a /refugios/1/gatos/2 sin body', () => {
+  service.asociarGato(1, 2).subscribe();       // es importante poner el subscribe
+  const req = http.expectOne(`${base}/refugios/1/gatos/2`);
+  expect(req.request.method).toBe('POST');
+  expect(req.request.body).toBeNull();
+  req.flush(respuestaRefugio1);
+});
+
+it('asociarGato debe responder al error 400', () => {
+  let mensaje = '';
+  service.asociarGato(2, 1).subscribe({
+    error: (error: HttpErrorResponse) => { mensaje = leerMensaje(error); },
+  });
+  http.expectOne(`${base}/refugios/2/gatos/1`)
+    .flush('El gato ya pertenece a otro refugio', { status: 400, statusText: 'Bad Request' });
+
+  expect(mensaje).toBe('El gato ya pertenece a otro refugio');
+});
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Lo que hay que recordar de las pruebas de servicio
+
+- `http.post` es un **Observable frío**: la petición solo sale al llamar `.subscribe()`
+- `expectOne` exige **exactamente una** petición a esa URL
+- `flush` con `status: 400` produce el error en el `subscribe`
+- `verify()` en `afterEach` atrapa peticiones olvidadas
+
+Verificamos tres cosas de la llamada: la **URL**, el **verbo** y el **cuerpo**.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Probar una ruta y su detalle
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.62em;">
+
+## `RouterTestingHarness`
+
+```typescript
+beforeEach(async () => {
+  TestBed.configureTestingModule({
+    providers: [
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      provideRouter([{ path: 'gatos/:id', component: DetalleGato }],
+                    withComponentInputBinding()),
+    ],
+  });
+  http = TestBed.inject(HttpTestingController);
+  harness = await RouterTestingHarness.create();
+});
+```
+
+- Probamos el componente **dentro de su ruta real**: el Router entrega el `id` de la URL
+- Sin `withComponentInputBinding()`, el `input` nunca recibe el parámetro
+- `provideRouter` también evita el error `NG0201: No provider found for ActivatedRoute`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Tres funciones auxiliares
+
+```typescript
+// Navega con el Router y pinta
+async function ir(url: string): Promise<void> {
+  await harness.navigateByUrl(url, DetalleGato);
+  harness.detectChanges();
+}
+
+// Responde la petición probada y la lista pendiente, espera y vuelve a pintar
+async function responder(url: string, cuerpo: string | object, opciones?: { status: number; statusText: string }) {
+  http.expectOne(url).flush(cuerpo, opciones);
+  http.match(`${base}/gatos`).forEach((req) => req.flush([]));
+  await harness.fixture.whenStable();
+  harness.detectChanges();
+}
+
+// Lo que el usuario ve en pantalla
+function texto(): string {
+  return harness.routeNativeElement?.textContent ?? '';
+}
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Tres pruebas del detalle
+
+```typescript
+it('debe pedir el gato de la URL y mostrar su nombre', async () => {
+  await ir('/gatos/1');
+  await responder(`${base}/gatos/1`, respuestaGato1);
+  expect(texto()).toContain('Milo J');
+});
+
+it('no debe mostrar el gato anterior mientras carga el siguiente', async () => {
+  await ir('/gatos/1');
+  await responder(`${base}/gatos/1`, respuestaGato1);
+  await ir('/gatos/2');                       // la respuesta todavía no llega
+  expect(texto()).not.toContain('Milo J');
+  await responder(`${base}/gatos/2`, luna);
+});
+
+it('debe avisar que el gato no existe cuando el back responde 404', async () => {
+  await ir('/gatos/999');
+  await responder(`${base}/gatos/999`, 'No existe el gato con id 999', { status: 404, statusText: 'Not Found' });
+  expect(texto()).toContain('Ese gato no existe');
+});
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Probar un componente con interacción
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.55em;">
+
+## Preparar la pantalla de asociación
+
+```typescript
+beforeEach(async () => {
+  TestBed.configureTestingModule({
+    providers: [
+      provideHttpClient(), provideHttpClientTesting(),
+      provideRouter([
+        { path: 'refugios/:id', component: DetalleRefugio },        // a donde vuelve al asociar
+        { path: 'refugios/:id/add-gato', component: AsociarGato },  // la pantalla que se prueba
+      ], withComponentInputBinding()),
+    ],
+  });
+  http = TestBed.inject(HttpTestingController);
+  harness = await RouterTestingHarness.create();
+});
+
+// Responde la lista de refugios que el servicio pide al crearse, espera y pinta
+async function pintar(): Promise<void> {
+  http.match(`${base}/refugios`).forEach((req) => req.flush([]));
+  await harness.fixture.whenStable();
+  harness.detectChanges();
+}
+
+// Abre la pantalla del refugio 1 y responde las dos peticiones que hace al nacer
+async function abrirConGatos(gatos: Gato[]): Promise<void> {
+  await harness.navigateByUrl('/refugios/1/add-gato', AsociarGato);
+  http.expectOne(`${base}/gatos`).flush(gatos);                 // las opciones del selector
+  http.expectOne(`${base}/refugios/1`).flush(respuestaRefugio1); // el refugio al que se asocia
+  await pintar();
+}
+```
+
+`abrirConGatos` es de la prueba, no de Angular: las dos peticiones salen al abrir la ruta, y cada una se responde con `flush`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Imitar al usuario
+
+```typescript
+function elegirYAsociar(nombre: string): void {
+  const pantalla = harness.routeNativeElement as HTMLElement;
+  const selector = pantalla.querySelector('select') as HTMLSelectElement;
+
+  // Con [ngValue] el value de la opción no es el id: se busca por el texto
+  const opcion = Array.from(selector.options).find((o) => o.textContent?.includes(nombre));
+  selector.value = (opcion as HTMLOptionElement).value;
+
+  // Cambiar el value desde código no dispara el evento que escucha Angular
+  selector.dispatchEvent(new Event('change'));
+  harness.detectChanges();
+
+  (pantalla.querySelector('button[type="submit"]') as HTMLButtonElement).click();
+}
+```
+
+El botón sigue deshabilitado hasta que se elige un gato, así que la prueba también confirma que el formulario se habilita.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Éxito: el `POST` y la vuelta al detalle
+
+```typescript
+it('debe enviar el POST del gato elegido y volver al detalle del refugio', async () => {
+  await abrirConGatos([nube, simba]);
+  const refugioConNube = { ...respuestaRefugio1, gatos: [...respuestaRefugio1.gatos, nube] };
+
+  elegirYAsociar('Nube');
+
+  const req = http.expectOne(`${base}/refugios/1/gatos/3`);
+  expect(req.request.method).toBe('POST');
+  expect(req.request.body).toBeNull();
+  req.flush(refugioConNube);
+
+  // La petición del detalle aparece después de la navegación: vi.waitFor reintenta
+  await vi.waitFor(() => http.expectOne(`${base}/refugios/1`).flush(refugioConNube));
+  await pintar();
+
+  expect(TestBed.inject(Router).url).toBe('/refugios/1');
+  expect(texto()).toContain('Nube');
+});
+```
+
+`vi.waitFor` reintenta porque la petición del detalle nace **después** de la navegación.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Las pruebas negativas
+
+```typescript
+it('debe mostrar el mensaje del back y quedarse en la vista cuando la asociación falla', async () => {
+  await abrirConGatos([nube, simba]);
+  elegirYAsociar('Simba');
+
+  http.expectOne(`${base}/refugios/1/gatos/4`)
+    .flush('El gato ya pertenece a otro refugio', { status: 400, statusText: 'Bad Request' });
+  await pintar();
+
+  expect(texto()).toContain('El gato ya pertenece a otro refugio');
+  expect(TestBed.inject(Router).url).toBe('/refugios/1/add-gato');   // no navegó
+});
+
+it('debe avisar que no hay gatos para elegir y no pintar el selector', async () => {
+  await abrirConGatos([]);
+  expect(texto()).toContain('No hay gatos para elegir');
+  expect((harness.routeNativeElement as HTMLElement).querySelector('select')).toBeNull();
+});
+```
+
+Un `400` y una lista vacía: dos casos que el usuario real encuentra y que Vitest provoca a voluntad.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Probar el contrato
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Una respuesta real, guardada
+
+```typescript
+// testing/respuestas-back.ts: capturada de una petición real a localhost:8080/gatos/1
+export const respuestaGato1 = {
+  id: 1,
+  nombre: 'Milo J',
+  raza: 'Naranja mestizo',
+  edad: 3,
+  color: 'Naranja',
+  personalidad: ['curioso', 'juguetón', 'sociable'],
+  imagen: 'https://cataas.com/cat?width=400&height=300&hash=milo',
+};
+```
+
+```typescript
+// contrato.spec.ts
+it('la respuesta de GET /gatos/1 debe coincidir con el modelo Gato', () => {
+  const gato: Gato = respuestaGato1; // si no se ajusta, el archivo no compila
+  expect(gato.nombre).toBe('Milo J');
+});
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## La comprobación la hace el compilador
+
+Si renombramos `imagen` a `foto` en el modelo `Gato`:
+
+```text
+error TS2741: Property 'foto' is missing in type
+  '{ id: number; nombre: string; ... imagen: string; }' but required in type 'Gato'.
+```
+
+- La prueba de contrato falla porque el archivo **no compila**
+- Si el back no envía un campo, lo marcamos opcional (`genero?: string`). Si el front lo necesita, lo agregamos al back
+
+Cuando el back cambie un campo, volvemos a capturar la respuesta.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Romper el código a propósito (mutantes)
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## El procedimiento
+
+1. Hacemos commit y trabajamos en una rama de práctica: `git switch -c practica-mutaciones`
+2. Hacemos **un solo cambio** en el código
+3. Ejecutamos `ng test --watch=false`
+4. Restauramos con `git restore`
+
+Si al romper el código **ninguna prueba falla**, falta una prueba. La escribimos y repetimos el experimento.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.55em;">
+
+## Cambios y pruebas que deben fallar
+
+| Cambio | Prueba que debe fallar |
+| --- | --- |
+| En `asociarGato`, enviar `{}` en vez de `null` | La del `POST` sin cuerpo |
+| En `asociarGato`, cambiar `/gatos/` por `/gato/` | Las del servicio y las del componente de asociación |
+| En `DetalleGato`, renombrar el `input` `id` a `gatoId` | Las del detalle por ruta |
+| En `DetalleGato`, hacer que `noExiste` devuelva siempre `false` | La del `404` |
+| En `DetalleGato`, leer `value()` sin `hasValue()` | Las del `404` y el `500` |
+| En `AsociarGato`, quitar `router.navigate(...)` | La de éxito de la asociación |
+| En `leerMensaje`, devolver siempre el mensaje genérico | La del mensaje del back |
+| En la plantilla, quitar la rama "No hay gatos para elegir" | La de lista vacía |
+| En `Gato`, renombrar `imagen` a `foto` | La de contrato (`TS2741`) |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Cobertura
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Medir la cobertura
+
+```bash
+pnpm list vitest                                   # la versión de vitest
+pnpm add -D @vitest/coverage-v8@<esa versión>
+pnpm test --watch=false --coverage \
+  --coverage-reporters=lcov --coverage-reporters=text
+```
+
+- El medidor debe tener **la misma versión** que `vitest`. Si no, aparece `Running mixed versions is not supported`
+- El reporte `text` sale en la consola
+- `coverage/<proyecto>/lcov.info` es el archivo que el pipeline envía a SonarQube
+- `coverage/<proyecto>/lcov-report/index.html` se abre en el navegador
+- La carpeta `coverage` está en `.gitignore`
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Leer la tabla
+
+| Columna | Qué mide |
+| --- | --- |
+| `% Stmts` | Instrucciones ejecutadas |
+| `% Branch` | Ramas de `if`, `?:` y `&&` que se tomaron |
+| `% Funcs` | Funciones llamadas al menos una vez |
+| `% Lines` | Líneas ejecutadas |
+| `Uncovered Line #s` | Las líneas que **ninguna prueba ejecutó** |
+
+En el navegador, las líneas no ejecutadas aparecen en rojo y las ramas no tomadas, en amarillo. Las plantillas `.html` también se miden.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Cobertura no es calidad
+
+Una prueba que llama al método y responde cualquier petición, sin verificar URL, verbo ni cuerpo, produce **la misma cobertura** que la prueba correcta.
+
+Si cambiamos la URL del `POST` de `/gatos` a `/gato`:
+
+- La prueba correcta **falla**
+- La prueba débil **pasa**
+
+La cobertura sirve para **encontrar código sin pruebas**, no para evaluar la calidad de las pruebas.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Qué hace el pipeline con la cobertura
+
+1. Instala `@vitest/coverage-v8` con la versión de `vitest`, si falta
+2. Ejecuta `pnpm test --coverage --coverage-reporters=lcov`
+3. Envía `coverage/<proyecto>/lcov.info` a **SonarQube**, que combina la cobertura del front con la del back
+4. Excluye del cálculo `main.ts`, `app.config.ts` y la carpeta `environments`
+
+Es el mismo camino que ya recorren las pruebas del back.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Pruebas de punta a punta con Playwright
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Qué es una prueba de punta a punta
+
+Recorre la aplicación **como lo haría una persona**: con el front real, el back real y una red real.
+
+- Playwright controla un navegador real (por ejemplo, Chromium)
+- Está en la punta de la pirámide: pocas, lentas y costosas
+- Necesita el front y el back **corriendo** al mismo tiempo
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## Vitest y Playwright
+
+| | Vitest | Playwright |
+| --- | --- | --- |
+| Dónde corre | Node, con un navegador simulado (jsdom) | Un navegador real |
+| El back | Simulado | Real |
+| Qué necesita | Nada más | Front y back corriendo |
+| Velocidad | Segundos | Lenta |
+| Dónde se ejecuta | `ng test` y el pipeline | En la máquina del desarrollador |
+| ¿Obligatoria? | Sí | No |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Lo que solo ve una prueba e2e
+
+- **CORS**: el navegador bloquea la respuesta cuando el back no permite el origen del front. Vitest nunca hace una petición real, así que no lo detecta
+- **Integración real**: un mock puede dejar de coincidir con el back sin que ninguna prueba lo note
+- **Interacción real**: un botón deshabilitado o tapado hace fallar la prueba (`element is not enabled`)
+- **Historial y URL**: el botón atrás, recargar y escribir una URL se prueban con el navegador, no con el Router simulado
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Lo que hace peor
+
+- Es **lenta**
+- Necesita **todo el sistema** levantado
+- Depende de los **datos**: conviene crear datos únicos en cada corrida
+- Diagnosticar un fallo cuesta más: ¿falló el front, el back o la red?
+
+Por eso las usamos poco: para caminos felices que cruzan capas y para errores que dependen de la integración real.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Qué recorridos probar
+
+| Se prueba con Playwright | Se prueba con Vitest |
+| --- | --- |
+| Un camino feliz por cada funcionalidad importante: crear, abrir el detalle, asociar y ver el resultado | Los errores del back (`400`, `404`) |
+| Solo los errores que dependen de la integración real, como una respuesta bloqueada por CORS | Las vistas sin datos |
+
+Solo recorridos que cruzan todas las capas.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Instalar y configurar Playwright
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Instalación
+
+En la carpeta del proyecto Angular:
+
+```bash
+pnpm add -D @playwright/test
+npx playwright install chromium
+```
+
+- El primer comando instala Playwright como dependencia de desarrollo
+- El segundo descarga Chromium, **una sola vez por computador**
+- Si pnpm 11 muestra `ERR_PNPM_IGNORED_BUILDS`, Playwright sí quedó instalado: el aviso trata de otras dependencias. Por eso se usa `npx` y no `pnpm exec`
+
+```text
+# .gitignore
+/test-results
+/playwright-report
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.65em;">
+
+## `playwright.config.ts`
+
+```typescript
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e',
+  workers: 1,
+  reporter: 'list',
+  use: {
+    baseURL: 'http://localhost:4200',
+    trace: 'retain-on-failure',
+  },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+});
+```
+
+- `testDir: './e2e'`: fuera de `src`, así `ng test` no las encuentra
+- `workers: 1`: dos pruebas que escriben en el back no se pisan
+- `baseURL`: `page.goto('/')` abre `http://localhost:4200/`
+- `trace: 'retain-on-failure'`: guarda una traza solo de las pruebas que fallan
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Escribir una prueba e2e
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Anatomía
+
+- **`page`**: una pestaña nueva en cada prueba, sin estado compartido
+- **Localizadores** que buscan lo que el usuario ve: por rol, etiqueta o texto
+- Un localizador debe coincidir con **un solo** elemento. Si no, aparece `strict mode violation`
+- Las aserciones, como `expect(page).toHaveURL(...)`, **reintentan** hasta cumplirse o agotar el tiempo (5 segundos)
+
+```typescript
+await page.getByRole('link', { name: 'Refugios' }).click();
+await page.getByLabel('Nombre').fill(nombre);
+await expect(page).toHaveURL('/gatos');
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## El recorrido: crear, asociar y ver (1 de 2)
+
+```typescript
+test('crear un gato, asociarlo a un refugio y verlo en su detalle', async ({ page }) => {
+  // Un nombre distinto en cada corrida: la prueba no depende de la anterior
+  const nombre = `Gato de prueba ${Date.now()}`;
+  const raza = 'Criollo';
+
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Crear gato' }).click();
+  await page.getByLabel('Nombre').fill(nombre);
+  await page.getByLabel('Raza').fill(raza);
+  await page.getByLabel('Edad').fill('3');
+  await page.getByLabel('Color').fill('Negro');
+  await page.getByLabel('Personalidad').fill('curioso, tranquilo');
+  await page.getByLabel('URL de la imagen').fill('https://example.com/gato.jpg');
+  await page.getByRole('button', { name: 'Crear gato' }).click();
+
+  // Al guardar, la aplicación vuelve a la lista, donde aparece el gato nuevo
+  await expect(page).toHaveURL('/gatos');
+  await expect(page.getByRole('link', { name: nombre })).toBeVisible();
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## El recorrido: crear, asociar y ver (2 de 2)
+
+```typescript
+  await page.getByRole('link', { name: 'Refugios' }).click();
+  await page.getByRole('link', { name: 'Huellitas' }).click();
+  await page.getByRole('link', { name: 'Asociar un gato' }).click();
+
+  // La opción 0 es "Elige un gato"
+  await page.getByLabel('Gato', { exact: true }).selectOption({ label: `${nombre} (${raza})` });
+  await page.getByRole('button', { name: 'Asociar gato' }).click();
+
+  // Al asociar, vuelve al detalle del refugio, que ahora lista al gato
+  await expect(page).toHaveURL(/\/refugios\/\d+$/);
+  const fila = page.getByRole('listitem').filter({ hasText: nombre });
+  await expect(fila).toBeVisible();
+
+  // Limpieza: quitar el gato para no llenar la capacidad en corridas repetidas
+  await fila.getByRole('button', { name: 'Quitar' }).click();
+  await expect(fila).toHaveCount(0);
+});
+```
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Qué hace buena a esta prueba
+
+- **Localizadores semánticos** (`getByRole`, `getByLabel`), no clases de Bootstrap ni la estructura del HTML. Si se reordena el HTML, no se rompe, y obliga a que el botón sea accesible
+- **Sin esperas fijas**: las acciones y los `expect` esperan solos
+- **Datos únicos** (`Date.now()`): una corrida no depende de la anterior
+- **Limpieza** al final de lo que creó
+- **Expresión regular en la URL** (`/\/refugios\/\d+$/`): el `id` cambia
+- **La última aserción es la prueba real**: confirma que la asociación existe en el back y que el front la volvió a pedir
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Correr la prueba
+
+Con el back y el front corriendo (`ng serve`):
+
+```bash
+npx playwright test
+```
+
+```text
+  ok 1 [chromium] › e2e/asociar-gato.spec.ts:3:5 › crear un gato, asociarlo ... (3.9s)
+
+  1 passed (15.0s)
+```
+
+Dos corridas seguidas deben pasar. Si una prueba falla, abrimos su traza:
+
+```bash
+npx playwright show-trace test-results/<carpeta-de-la-prueba>/trace.zip
+```
+
+`pnpm test` corre Vitest, **no** Playwright.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## La prueba de CORS
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Provocar un error que solo Playwright ve
+
+1. En `CorsConfig`, cambiamos el origen permitido:
+   `.allowedOrigins("http://localhost:4201")` en vez de `4200`
+2. Reiniciamos el back
+3. `ng test --watch=false`: **Vitest sigue en verde**
+4. `npx playwright test`: **la prueba falla**. El navegador bloquea la respuesta del `POST` y la aplicación se queda en la vista de creación
+5. Restauramos `http://localhost:4200` y reiniciamos el back
+
+Postman tampoco lo detecta: no envía la cabecera `Origin`.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Demo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Release 8
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.55em;">
+
+## Ahora es su turno: Release 8
+
+Usen el tiempo restante de la clase para cerrar el [Release 8: navegación y asociaciones en el front](https://recursos-isis-2211.virtual.uniandes.edu.co/proyecto/segunda_parte/release8/). Tutoriales: [pruebas con Vitest](https://recursos-isis-2211.virtual.uniandes.edu.co/talleres/tutorial-front-r8-pruebas-vitest/), [cobertura](https://recursos-isis-2211.virtual.uniandes.edu.co/talleres/tutorial-front-r8-cobertura/) y [Playwright](https://recursos-isis-2211.virtual.uniandes.edu.co/talleres/tutorial-front-r8-playwright/).
+
+</div>
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
