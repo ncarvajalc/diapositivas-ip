@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Calidad de código y métricas
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Agenda
+
+- ¿Dónde estamos?
+- ¿Qué es la calidad de software?
+- ¿Qué es "buen código"?
+- Análisis estático
+- Mantenibilidad y malos olores
+- Qué se mide
+- Complejidad ciclomática y cognitiva
+- Medir es aproximar
+- Deuda técnica
+- Umbrales, código nuevo y puerta de calidad
+- SonarQube
+- Demo
+- ¿Preguntas?
+- Trabajo práctico: Release 9
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Dónde estamos?
+
+- Back completo, con pruebas JUnit y cobertura
+- Front con pruebas de Vitest, cobertura y un recorrido de punta a punta con Playwright
+- El pipeline ya envía las pruebas y la cobertura a SonarQube
+
+Vamos a entender cómo funciona SonarQube y qué nos indica.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Motivación
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Unas pruebas en verde bastan para asegurar la calidad de nuestro software?
+
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Un programa puede pasar todas sus pruebas y seguir siendo **difícil de entender**, **costoso de cambiar** o **inseguro**
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Las pruebas responden si el programa hace lo que debe, no si hay "buen código"
+- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->Hay métricas para identificar lo que es un "buen código"
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué es la calidad de software?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## La calidad tiene varias dimensiones
+
+- Un producto puede ser bueno en una dimensión y malo en otra
+- Los modelos de calidad las nombran y las organizan
+- Hay modelos como **ISO/IEC 25010** que son normas estándar que definen la calidad
+- Hoy nos concentramos en la **mantenibilidad**, la característica que más se ve en el código
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Qué es "buen código"?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Siempre pregúntense
+
+- ¿Hace lo que debe?
+- ¿Se puede entender?
+- ¿Se puede cambiar sin romper algo?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Análisis estático
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+### Análisis estático
+
+- Lee el código y busca patrones conocidos de deficiencias de calidad.
+- No hay necesidad de ejecutar el código para hacer este tipo de análisis.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El perfil de calidad
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Reglas activas
+
+- El análisis estático es una lista de **reglas**, y cada una describe un patrón
+- El conjunto de reglas activas es el **perfil de calidad** (*quality profile*)
+
+**En SonarQube**
+
+- Cada lenguaje tiene sus reglas, y un perfil activa una parte de ellas
+- Un equipo puede configurar un perfil
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## El perfil decide qué se busca
+
+<div style="width: 80%; transform: scale(1.15); transform-origin: center;">
+
+
+<div class="mermaid">
+flowchart LR
+    R["Reglas activas (perfil de calidad)"] --> H[Hallazgos y medidas]
+    H --> G{Puerta de calidad}
+    G -->|Cumple| OK[Pasa]
+    G -->|No cumple| F[No pasa]
+
+</div>
+
+
+</div>
+
+- El perfil decide **qué se busca**
+- La puerta de calidad decide **cuánto se tolera**
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Mantenibilidad y malos olores
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Subcaracterísticas de la mantenibilidad
+
+- **Modularidad**
+- **Reusabilidad**
+- **Analizabilidad**
+- **Modificabilidad**
+- **Capacidad de ser probado**
+
+Un **mal olor** (*bad smell* o *code smell*) no es un error: el programa funciona, pero cuesta cambiarlo. El término es de Kent Beck y lo popularizó Martin Fowler.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Malos olores frecuentes
+
+| Mal olor | Ejemplo | Por qué dificulta cambiar |
+| --- | --- | --- |
+| Nombres sin sentido | `int t`, `double p`, `temp`, `data2` | Hay que leer todo el método para entenderlos |
+| Números mágicos | `precio * 1.19` | No se sabe qué es; cambiar el IVA exige buscar cada caso |
+| Código duplicado | Las mismas diez líneas en tres métodos | Cada cambio se hace tres veces y puede olvidarse una |
+| Métodos muy largos | Un método de 150 líneas que valida, calcula y guarda | No se entiende ni se prueba por partes |
+| Código que nadie usa | Una variable nunca leída, un método sin llamadas | Se pierde tiempo y nadie se atreve a borrarlo |
+| Anidamiento profundo | `if` dentro de `if` | Hay que recordar varias condiciones a la vez |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Números mágicos en nuestro demo
+
+```java
+// Antes: ¿qué significa 25?
+if (gato.getEdad() == null || gato.getEdad() < 0 || gato.getEdad() > 25) {
+    throw new IllegalOperationException("La edad debe estar entre 0 y 25");
+}
+```
+
+```java
+// Después: el valor tiene nombre y un solo lugar
+private static final int EDAD_MINIMA = 0;
+private static final int EDAD_MAXIMA = 25;   // un gato doméstico rara vez pasa de 25 años
+
+if (gato.getEdad() == null || gato.getEdad() < EDAD_MINIMA || gato.getEdad() > EDAD_MAXIMA) {
+    throw new IllegalOperationException(
+        "La edad debe estar entre " + EDAD_MINIMA + " y " + EDAD_MAXIMA);
+}
+```
+
+- Ambas versiones hacen lo mismo; la segunda es fácil de cambiar
+- Si la regla cambia, se modifica un solo lugar y el mensaje se actualiza solo
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Lo que las herramientas no ven
+
+- Las herramientas detectan bien algunos malos olores: código duplicado, métodos largos, código sin uso
+- No detectan los **nombres engañosos**: una variable llamada `edad` que guarda un peso
+- Por eso sigue haciendo falta la **revisión de otra persona** en el PR
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Qué se mide
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Las medidas de SonarQube
+
+| Medida | Qué responde |
+| --- | --- |
+| Defectos (*bugs*) | Código que probablemente falle o se comporte distinto de lo previsto |
+| Vulnerabilidades | Código que un atacante podría aprovechar |
+| Puntos críticos de seguridad (*security hotspots*) | Código sensible que debe revisar una persona para decidir si es seguro |
+| Malos olores (*code smells*) | Código que funciona pero es difícil de leer o cambiar |
+| Duplicación | Porcentaje de líneas repetidas: `líneas duplicadas / líneas totales * 100` |
+| Complejidad | Cantidad de caminos y dificultad de seguirlos |
+| Cobertura | Porcentaje del código ejecutado por las pruebas |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Hallazgos y medidas
+
+- Los tres primeros (defectos, vulnerabilidades y puntos críticos) son **hallazgos**: se corrigen o se revisan
+- Los demás son **medidas**: se interpretan
+
+**Sobre la cobertura**: un `if` cuenta completo solo si las pruebas recorren sus dos ramas, la verdadera y la falsa.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Complejidad
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Dos formas de contarla
+
+- **Complejidad ciclomática** = 1 + número de ramas condicionales. Indica cuántas pruebas mínimas se necesitan para recorrer todos los caminos
+- **Complejidad cognitiva**: mide qué tan difícil es **entender** el método
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Cómo se cuenta la complejidad cognitiva
+
+1. Se ignora lo que resume varias instrucciones en una, por ejemplo llamar a un método
+2. Se suma **1** por cada ruptura del flujo: `if`, `else if`, `else`, `for`, `while`, cada `catch`, cada `switch` completo y cada secuencia de operadores lógicos iguales
+   - `a && b && c` suma 1
+   - `a && b || c` suma 2
+3. Se suma además el **nivel de anidamiento** de las estructuras que están dentro de otra
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Cuatro `if` anidados
+
+```java [1|2|3|4|5|6-12|1-12]
+boolean puedeAdoptarse(GatoEntity gato) {                    // empezamos: cic = 1, cog = 0
+    if (gato != null) {                                      // cic +1, cog +1            ->  cic = 2, cog = 1
+        if (gato.getRefugio() != null) {                     // cic +1, cog +1 +1 (nivel 1) ->  cic = 3, cog = 3
+            if (gato.getEdad() >= 1) {                       // cic +1, cog +1 +2 (nivel 2) ->  cic = 4, cog = 6
+                if (!gato.getPersonalidad().isEmpty()) {     // cic +1, cog +1 +3 (nivel 3) ->  cic = 5, cog = 10
+                    return true;                             // no suma
+                }
+            }
+        }
+    }
+    return false;                                            // no suma
+}                                                            // resultado: cic = 5, cog = 10
+```
+
+`cic` = complejidad ciclomática, `cog` = complejidad cognitiva.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.6em;">
+
+## Los mismos cuatro `if`, seguidos
+
+```java [1|2|3|4|5|6-7|1-7]
+boolean puedeAdoptarse(GatoEntity gato) {                    // empezamos: cic = 1, cog = 0
+    if (gato == null) { return false; }                      // cic +1, cog +1  ->  cic = 2, cog = 1
+    if (gato.getRefugio() == null) { return false; }         // cic +1, cog +1  ->  cic = 3, cog = 2
+    if (gato.getEdad() < 1) { return false; }                // cic +1, cog +1  ->  cic = 4, cog = 3
+    if (gato.getPersonalidad().isEmpty()) { return false; }  // cic +1, cog +1  ->  cic = 5, cog = 4
+    return true;                                             // no suma
+}                                                            // resultado: cic = 5, cog = 4
+```
+
+Hace exactamente lo mismo que la versión anidada.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.7em;">
+
+## Misma ciclomática, distinta lectura
+
+| | Cuatro `if` anidados | Cuatro `if` seguidos |
+| --- | --- | --- |
+| Lo que hace | Lo mismo | Lo mismo |
+| Ciclomática | 5 | 5 |
+| Cognitiva | 1 + 2 + 3 + 4 = **10** | 4 |
+
+- Necesitan las **mismas pruebas**, pero la versión anidada es más del doble de difícil de leer
+- La ciclomática no ve esa diferencia; la cognitiva sí, porque cada nivel de anidamiento obliga a recordar más condiciones
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Medir es aproximar
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Una métrica es un indicador
+
+Una métrica no es la verdad completa.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Ley de Goodhart
+
+> Cuando una medida se vuelve una meta, deja de ser una buena medida.
+
+- ¿Saben la historia de las serpientes en India?
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Escribir pruebas **sin comprobaciones** para llegar a 80 % de cobertura
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Esconder problemas para tener "0 malos olores"
+
+- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->En ambos casos el número mejora y el código no.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Deuda técnica
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Un atajo es un préstamo
+
+El término es de Ward Cunningham.
+
+- Un atajo (duplicar en vez de extraer, dejar un método largo, posponer una prueba) es un **préstamo**
+- Los **intereses** son el costo extra de cada cambio futuro
+- Si no se paga, los intereses crecen hasta que cambiar tarda más que construir de nuevo
+
+En finanzas una deuda es buena siempre y cuando haya retorno. Con la deuda técnica hay que ponderar ese retorno.
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## Cómo la calcula SonarQube
+
+- **Deuda técnica** = suma de los minutos estimados para corregir cada mal olor
+- **Razón de deuda** = deuda / costo de desarrollar el código desde cero (30 minutos por línea, por defecto)
+
+| Calificación de mantenibilidad | Razón de deuda |
+| --- | --- |
+| A | hasta 5 % |
+| B | de 5 % a menos de 10 % |
+| C | de 10 % a menos de 20 % |
+| D | de 20 % a menos de 50 % |
+| E | 50 % o más |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Un ejemplo con números
+
+Un proyecto de 3.000 líneas:
+
+- Costo de desarrollarlo desde cero: 3.000 × 30 min = **90.000 min**
+- Para mantener la **A**, la deuda no debe pasar de 5 %: **4.500 min**
+- Eso equivale a **75 horas** de corrección
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Umbrales y código nuevo
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Umbral y puerta de calidad
+
+- Un **umbral** es una regla para una medida: por ejemplo, cobertura de al menos 80 %
+- Un conjunto de umbrales es una **puerta de calidad** (*quality gate*): el código pasa o no pasa
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Exigir calidad al código nuevo
+
+- &shy;<!-- .element: class="fragment" data-fragment-index="1" -->Metáfora de una casa con goteras
+- &shy;<!-- .element: class="fragment" data-fragment-index="2" -->Medir un proyecto heredado completo suele dar "rojo" y no deja avanzar.
+- &shy;<!-- .element: class="fragment" data-fragment-index="3" -->La alternativa es exigir calidad solo al código **nuevo o modificado**: el proyecto no empeora y la deuda baja con el tiempo
+- &shy;<!-- .element: class="fragment" data-fragment-index="4" -->Pasamos de "¿todo el proyecto está limpio?" a "¿lo que acabo de escribir lo dejó igual o mejor?"
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## SonarQube
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## SonarQube en el pipeline del curso
+
+SonarQube es una herramienta de análisis estático que calcula las medidas y las compara con una puerta de calidad.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.75em;">
+
+## La puerta por defecto: *Sonar way*
+
+Se aplica sobre el **código nuevo** y no se puede editar:
+
+1. No se introducen problemas nuevos (defectos, vulnerabilidades o malos olores)
+2. Todos los puntos críticos de seguridad nuevos están revisados
+3. Cobertura del código nuevo de al menos **80 %**
+4. Duplicación del código nuevo de como máximo **3 %**
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Calificaciones de fiabilidad y seguridad
+
+La calificación (A a E) depende del problema **más grave**:
+
+| Problema más grave | Calificación |
+| --- | --- |
+| Ninguno | A |
+| Menor | B |
+| Mayor | C |
+| Crítico | D |
+| Bloqueante | E |
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## La puerta no detiene el build
+
+En el pipeline del curso, la puerta **no detiene el build** aunque falle.
+
+- El resultado queda visible en el build y en SonarQube
+- El equipo decide qué hacer con él
+- Es una señal para el equipo, no un bloqueo automático
+- En el sistemas empresariales suele ser bloqueante
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.8em;">
+
+## Precaución
+
+Un reporte limpio solo indica que el código no incumple **las reglas que la herramienta sabe revisar**.
+
+- No reemplaza la lectura de otra persona
+- No dice si el programa hace lo que el usuario necesita
+- Sigue siendo necesario revisar los PR
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Demo con sus proyectos
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## ¿Preguntas?
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Release 9
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="has-dark-background drop" data-background-color="#2E3440" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div style="font-size: 0.55em;">
+
+## Ahora es su turno: Release 9
+
+Usen el tiempo restante de la clase para avanzar el [Release 9: funcionalidades adicionales y calidad](https://recursos-isis-2211.virtual.uniandes.edu.co/proyecto/segunda_parte/release9/).
+
+1. Midan la deuda técnica de `main` en SonarQube **al inicio** y registren la medición en la wiki ("Revisión de calidad R9")
+2. Revisen los hallazgos: malos olores, números mágicos, duplicación y complejidad. Corrijan primero los de mayor impacto
+3. Meta: Máximo 2 horas de deuda técnica
+4. Recuerden que la puerta de calidad (A, A, A y 80 % de cobertura en código nuevo) no bloquea el merge y no es la meta de deuda, que se evalúa sobre el proyecto completo
+5. Midan de nuevo al final y registren la segunda medición
+6. Cada integrante agrega sus tres funcionalidades, cada una en su rama y PR, con pruebas
+7. Hay bono si hacen funcionalidades adicionales. Pueden ser las sugeridas por en los contenidos del curso o pueden discutirla con le profesor para ver si es válida para bono
+
+</div>
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":false,"transition":"slide","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
